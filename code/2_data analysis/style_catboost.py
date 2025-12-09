@@ -5,6 +5,9 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from catboost import CatBoostClassifier
 from sklearn.metrics import accuracy_score, classification_report
+from sklearn.preprocessing import MultiLabelBinarizer
+import ast
+
 
 # 1) 데이터 로드
 data = pd.read_csv(
@@ -31,8 +34,8 @@ data = data.drop(
         "파일명",
         "상의_기장",
         "상의_디테일",
-        "하의_디테일",
         "상의_넥라인",
+        "하의_디테일",
         "하의_프린트",
     ],
     axis=1,
@@ -51,11 +54,11 @@ label_mapping = dict(enumerate(le.classes_))  # 역매핑
 # 5) 조합 Feature 생성
 X["색상_조합"] = X["상의_색상"].astype(str) + "_" + X["하의_색상"].astype(str)
 X["핏_조합"] = X["상의_핏"].astype(str) + "_" + X["하의_핏"].astype(str)
-X["소재_조합"] = X["상의_소재"].astype(str) + "_" + X["하의_소재"].astype(str)
+# X["소재_조합"] = X["상의_소재"].astype(str) + "_" + X["하의_소재"].astype(str)
 
 # 6) train / test 분리
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y_encoded, test_size=0.2, random_state=10, stratify=y_encoded
+    X, y_encoded, test_size=0.2, stratify=y_encoded
 )
 
 print("\nTrain set class distribution:")
