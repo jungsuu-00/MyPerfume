@@ -11,6 +11,16 @@ data = pd.read_csv(
     "C:/Users/Admin/Desktop/PROJ/data/02_cleaned/clothes/0.top_bottom_only.csv",
     encoding="utf-8-sig",
 )
+data_val = pd.read_csv(
+    "C:/Users/Admin/Desktop/PROJ/data/02_cleaned/clothes_val/0.top_bottom_only.csv",
+    encoding="utf-8-sig",
+)
+
+# 아래로 합치기 (행 기준)
+data = pd.concat([data, data_val], axis=0).reset_index(drop=True)
+
+print(data.shape)
+
 
 # 2) 불필요한 컬럼 제거
 data = data.drop(
@@ -37,6 +47,7 @@ le = LabelEncoder()
 y_encoded = le.fit_transform(y)
 label_mapping = dict(enumerate(le.classes_))  # 역매핑
 
+
 # 5) 조합 Feature 생성
 X["색상_조합"] = X["상의_색상"].astype(str) + "_" + X["하의_색상"].astype(str)
 X["핏_조합"] = X["상의_핏"].astype(str) + "_" + X["하의_핏"].astype(str)
@@ -44,7 +55,7 @@ X["소재_조합"] = X["상의_소재"].astype(str) + "_" + X["하의_소재"].a
 
 # 6) train / test 분리
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y_encoded, test_size=0.2, random_state=42, stratify=y_encoded
+    X, y_encoded, test_size=0.2, random_state=10, stratify=y_encoded
 )
 
 print("\nTrain set class distribution:")
@@ -52,7 +63,7 @@ train_counter = Counter(y_train)
 for k, v in sorted(train_counter.items()):
     print(f"  label {k} ({label_mapping[k]}): {v}")
 
-# ✅ 7) y(스타일) 기반 최빈값 계산 (train 기준)
+# 7) y(스타일) 기반 최빈값 계산 (train 기준)
 train_df = X_train.copy()
 train_df["스타일"] = y_train
 
@@ -65,7 +76,7 @@ for col in X_train.columns:
     group_mode_map[col] = mode_by_style
 
 
-# ✅ 8) 최빈값으로 결측 대체
+# 8) 최빈값으로 결측 대체
 def fill_with_style_mode(row, style, mode_map):
     for col in row.index:
         if pd.isna(row[col]):
