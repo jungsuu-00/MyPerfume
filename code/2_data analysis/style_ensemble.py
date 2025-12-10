@@ -11,8 +11,11 @@ from sklearn.ensemble import (
     VotingClassifier,
     StackingClassifier,
 )
+from sklearn.model_selection import RandomizedSearchCV
+
 from lightgbm import LGBMClassifier
 from catboost import CatBoostClassifier
+from xgboost import XGBClassifier
 from sklearn.linear_model import LogisticRegression
 import category_encoders as ce
 import ast
@@ -47,7 +50,6 @@ data = data.drop(
 
 # 상의 카테고리가 '탑', '브라탑'인 행 제거
 data["상의_카테고리"] = data["상의_카테고리"].replace({"브라탑": "탑"})
-
 
 # -------------------------
 # 리스트 변환 함수
@@ -138,6 +140,7 @@ for col in X_train.columns:
 for df in [X_train, X_test]:
     df["색상_조합"] = df["상의_색상"] + "_" + df["하의_색상"]
     df["핏_조합"] = df["상의_핏"] + "_" + df["하의_핏"]
+    # df["소재_조합"] = df["상의_소재"] + "_" + df["하의_소재"]
 
 # -------------------------
 #  범주형 인코딩 (LightGBM, RF 용)
@@ -159,7 +162,7 @@ cb_weights = [class_weights[i] for i in sorted(class_weights.keys())]
 # Base Models 정의
 # -------------------------
 model_lgb = LGBMClassifier(
-    n_estimators=500,
+    n_estimators=200,
     learning_rate=0.05,
     max_depth=-1,
     class_weight=class_weights,
@@ -169,14 +172,16 @@ model_lgb = LGBMClassifier(
     n_jobs=1,
 )
 
-model_rf = RandomForestClassifier(
-    n_estimators=400, class_weight=class_weights, random_state=42, n_jobs=1
-)
+# model_rf = RandomForestClassifier(
+#     n_estimators=400, class_weight=class_weights, random_state=42, n_jobs=1
+# )
 
 model_cb = CatBoostClassifier(
-    iterations=500,
+    iterations=800,
     learning_rate=0.05,
     depth=8,
+    l2_leaf_reg=1,
+    bagging_temperature=0.5,
     loss_function="MultiClass",
     class_weights=cb_weights,
     random_seed=42,
@@ -206,14 +211,16 @@ def evaluate_model(model, X_train, y_train, X_test, y_test, name):
 
 
 model_lgb = evaluate_model(model_lgb, X_train, y_train, X_test, y_test, "LightGBM")
-model_rf = evaluate_model(model_rf, X_train, y_train, X_test, y_test, "RandomForest")
+# model_rf = evaluate_model(model_rf, X_train, y_train, X_test, y_test, "RandomForest")
 model_cb = evaluate_model(model_cb, X_train, y_train, X_test, y_test, "CatBoost")
 
 ## ===============================
 ## 14) Soft Voting Ensemble
 ## ===============================
 ensemble = VotingClassifier(
-    estimators=[("lgb", model_lgb), ("rf", model_rf), ("cb", model_cb)],
+    estimators=[("lgb", model_lgb),
+                # ("rf", model_rf),
+                ("cb", model_cb)],
     voting="soft",
     n_jobs=-1,
 )
@@ -232,7 +239,6 @@ print(
     )
 )
 
-
 # ## ===============================
 # ## 15) Stacking Ensemble (Scikit-Learn)
 # ## ===============================
@@ -249,7 +255,7 @@ print(
 # stacking_clf = StackingClassifier(
 #     estimators=[
 #         ('lgb', model_lgb),
-#         ('rf', model_rf),
+#         ('xgb', model_xgb),
 #         ('cb', model_cb)
 #     ],
 #     final_estimator=meta_model,
@@ -275,3 +281,5 @@ print(
 #     y_test, stack_pred,
 #     target_names=[label_mapping[i] for i in sorted(label_mapping.keys())]
 # ))
+
+
