@@ -2,100 +2,81 @@
 {% load static %}
 
 {% block content %}
-<!-- CSS 파일 연결 (캐시 방지를 위해 버전 ?v=6 으로 설정) -->
-<link rel="stylesheet" type="text/css" href="{% static 'ui/style.css' %}?v=6">
+<!-- CSS 연결 -->
+<link rel="stylesheet" type="text/css" href="{% static 'ui/style.css' %}?v=10">
 
 <div class="result-container">
-    
+
     <!-- 헤더 -->
-    <div style="text-align: center; margin-top: 40px; margin-bottom: 60px;">
+    <div class="result-header" style="text-align: center; margin-top: 40px; margin-bottom: 60px;">
         <h1 class="page-title">My Perfume</h1>
         <p class="page-subtitle">당신의 향을 찾으세요</p>
         <h2 class="section-header">For Me, 지금의 나에게 어울리는 향은?</h2>
     </div>
 
-    <!-- [1] 분석 결과 (이미지 + 텍스트) -->
-    <div class="analysis-section">
-        <!-- 분석 이미지 -->
-        <div class="analysis-img-box">
-            Analysis Image
+    <!-- [상단] 그림의 1번(옷) + 3번(설명) 영역 -->
+    <div class="analysis-horizontal-box">
+        <!-- 1번 영역: 분석된 옷 이미지 -->
+        <div class="clothing-img-box">
+            <span class="material-icons" style="font-size: 60px; color: #ddd; margin-bottom: 15px;">checkroom</span>
+            <p style="font-size: 14px;">선택한 코디 이미지</p>
+            <!-- 나중에 <img src="..."> 로 대체 가능 -->
         </div>
 
-        <!-- 분석 텍스트 -->
-        <div class="analysis-text">
-            <h3>분석결과</h3>
+        <!-- 3번 영역: LLM 분석 설명 -->
+        <div class="llm-explanation-box">
+            <h3>분석 결과 및 추천 이유</h3>
             <p>
-                당신은<br>
-                - (연령대) (성별)으로 (스타일) 스타일을 선호해요.<br>
-                - 선택한 코디의 포인트에서도 산뜻한 무드가 드러났습니다.<br>
-                - 취향 분석에서는 (향기 계열)을 좋아하는 경향이 나타나,<br>
-                이런 특징과 시즌 분위기에 맞춰 향수를 추천해드렸습니다.
+                오늘 선택하신 코디와 당신의 취향을 분석한 결과입니다.
+                차분한 색감의 의상에 맞춰 과하지 않으면서도 세련된 인상을 남길 수 있는 향기들을 선정했습니다.<br><br>
+                당신이 선호하는 향료와 현재 시즌의 분위기를 모두 고려하여,
+                오늘의 룩을 완벽하게 완성해줄 세 가지 향수를 제안해 드립니다.
             </p>
         </div>
     </div>
 
-    <!-- [2] TOP 3 추천 리스트 -->
-    <div class="top3-container">
-        <div class="top3-header">TOP3 Quick Pick <span class="material-icons">arrow_forward</span></div>
+    <!-- [하단] 그림의 2번 영역 (향수 3개 카드) -->
+    <div class="perfume-grid-container">
+        <h3 class="grid-title">TOP3 Quick Pick <span class="material-icons" style="vertical-align: middle;">arrow_forward</span></h3>
 
-        <!-- 향수 1 -->
-        <div class="perfume-item">
-            <div class="perfume-info">
-                <div class="perfume-img">Img</div>
-                <div class="perfume-text">
-                    <h4>Perfume Name 1</h4>
-                    <span class="brand">Brand Name</span>
-                    <span class="tags">4.5 • Unisex • Summer</span>
+        <div class="perfume-cards-wrapper">
+            <!-- 향수 카드 1 -->
+            <div class="perfume-card">
+                <div class="perfume-img-slot">
+                    <span class="material-icons" style="font-size: 50px;">local_fire_department</span>
+                </div>
+                <div class="perfume-details">
+                    <h4 class="p-name">Perfume Name 1</h4>
+                    <p class="p-brand">Brand Name</p>
+                    <span class="p-season">#Summer #Unisex</span>
                 </div>
             </div>
-            <!-- 차트 -->
-            <div class="scent-chart">
-                <div class="chart-row"><span class="chart-label">Fresh</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span></div></div>
-                <div class="chart-row"><span class="chart-label">Floral</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
-                <div class="chart-row"><span class="chart-label">Citrus</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
-                <div class="chart-row"><span class="chart-label">Woody</span><div class="dots"><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
-                <div class="chart-row"><span class="chart-label">Powdery</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
-            </div>
-        </div>
 
-        <!-- 향수 2 -->
-        <div class="perfume-item">
-            <div class="perfume-info">
-                <div class="perfume-img">Img</div>
-                <div class="perfume-text">
-                    <h4>Perfume Name 2</h4>
-                    <span class="brand">Brand Name</span>
-                    <span class="tags">4.2 • Female • Spring</span>
+            <!-- 향수 카드 2 -->
+            <div class="perfume-card">
+                <div class="perfume-img-slot">
+                    <span class="material-icons" style="font-size: 50px;">eco</span>
+                </div>
+                <div class="perfume-details">
+                    <h4 class="p-name">Perfume Name 2</h4>
+                    <p class="p-brand">Brand Name</p>
+                    <span class="p-season">#Spring #Female</span>
                 </div>
             </div>
-            <div class="scent-chart">
-                <div class="chart-row"><span class="chart-label">Fresh</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
-                <div class="chart-row"><span class="chart-label">Floral</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span></div></div>
-                <div class="chart-row"><span class="chart-label">Citrus</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
-                <div class="chart-row"><span class="chart-label">Woody</span><div class="dots"><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
-                <div class="chart-row"><span class="chart-label">Powdery</span><div class="dots"><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
-            </div>
-        </div>
 
-        <!-- 향수 3 -->
-        <div class="perfume-item">
-            <div class="perfume-info">
-                <div class="perfume-img">Img</div>
-                <div class="perfume-text">
-                    <h4>Perfume Name 3</h4>
-                    <span class="brand">Brand Name</span>
-                    <span class="tags">4.8 • Male • Winter</span>
+            <!-- 향수 카드 3 -->
+            <div class="perfume-card">
+                <div class="perfume-img-slot">
+                    <span class="material-icons" style="font-size: 50px;">water_drop</span>
+                </div>
+                <div class="perfume-details">
+                    <h4 class="p-name">Perfume Name 3</h4>
+                    <p class="p-brand">Brand Name</p>
+                    <span class="p-season">#Winter #Male</span>
                 </div>
             </div>
-            <div class="scent-chart">
-                <div class="chart-row"><span class="chart-label">Fresh</span><div class="dots"><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
-                <div class="chart-row"><span class="chart-label">Floral</span><div class="dots"><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
-                <div class="chart-row"><span class="chart-label">Citrus</span><div class="dots"><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
-                <div class="chart-row"><span class="chart-label">Woody</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span></div></div>
-                <div class="chart-row"><span class="chart-label">Powdery</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
-            </div>
         </div>
-
     </div>
+
 </div>
 {% endblock %}

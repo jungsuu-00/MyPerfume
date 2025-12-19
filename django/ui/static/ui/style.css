@@ -1,330 +1,140 @@
-/* --- [수정] 전체 컨테이너: 화면의 95%까지 쓰도록 설정 --- */
-.form-container {
-    max-width: 1000px;
-    width: 65%;
-    margin: 0 auto;
-}
-
-/* --- 기본 레이아웃 --- */
-.page-title { text-align: center; margin-bottom: 50px; font-size: 24px; font-weight: bold; }
+/* ============================================================
+   1. 공통 및 입력 폼 레이아웃 (기존 유지)
+   ============================================================ */
+.form-container { max-width: 1000px; width: 65%; margin: 0 auto; }
+.page-title { text-align: center; margin-top: 40px; margin-bottom: 50px; font-size: 24px; font-weight: bold; }
 .section { margin-bottom: 40px; }
 .content-align { padding: 0 50px; }
 .section-title { font-size: 16px; margin-bottom: 15px; font-weight: 600; }
 
-/* --- 버튼 스타일 --- */
 .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
 .selection-btn {
     padding: 8px 20px; border: 1px solid #ddd; background: white;
     border-radius: 20px; cursor: pointer; font-size: 14px; color: #555; transition: all 0.2s;
 }
-.selection-btn.active {
-    background-color: #d1c4e9; color: #512da8; border-color: #d1c4e9; font-weight: bold;
-}
+.selection-btn.active { background-color: #d1c4e9; color: #512da8; border-color: #d1c4e9; font-weight: bold; }
 
-/* --- [수정] 그룹 박스: 꽉 채우기 --- */
 .clothing-box {
-    width: 100%;
-    border: 2px solid #eee;
-    border-radius: 25px;
-    padding: 50px;
-    margin-bottom: 30px;
-    background-color: #fff;
-    transition: all 0.3s ease;
-    box-sizing: border-box;
+    width: 100%; border: 2px solid #eee; border-radius: 25px; padding: 50px;
+    margin-bottom: 30px; background-color: #fff; box-sizing: border-box;
 }
 .box-label {
     font-size: 14px; font-weight: bold; color: #333; margin-bottom: 25px;
     display: inline-block; background: #f5f5f5; padding: 5px 15px; border-radius: 10px;
 }
-.clothing-box.disabled {
-    opacity: 0.4; pointer-events: none; filter: grayscale(100%); border-color: #f0f0f0;
-}
+.outfit-row, .split-layout { display: flex; justify-content: flex-start; gap: 70px; margin-bottom: 15px; }
 
-/* --- [수정] 레이아웃 간격 조정 --- */
-.outfit-row {
-    display: flex; justify-content: flex-start; align-items: center;
-    gap: 70px; /* 왼쪽 선택창과 오른쪽 이미지 사이 간격 줄임 */
-    margin-bottom: 15px;
-}
-.split-layout {
-    display: flex; justify-content: flex-start; align-items: flex-start;
-    gap: 70px;
-}
-.left-column {
-    display: flex; flex-direction: column; gap: 20px;
-    min-width: 350px;
-}
-
-/* --- 슬라이더 공통 --- */
-.slider-wrapper { display: flex; align-items: center; gap: 5px; }
-.slider-window { width: 340px; overflow: hidden; padding: 10px 0; }
-.slider-track { display: flex; transition: transform 0.3s ease-in-out; gap: 0; }
-.nav-btn {
-    background: none; border: none; cursor: pointer; color: #aaa; font-size: 30px; padding: 0;
-    display: flex; align-items: center; border-radius: 50%;
-}
-.nav-btn:hover { color: #333; background-color: rgba(0,0,0,0.05); }
-
-/* --- [아이템] 옷 (사각형 이미지 박스) --- */
 .outfit-item {
     display: flex; flex-direction: column; align-items: center; cursor: pointer;
-    opacity: 0.6; transition: all 0.2s; flex-shrink: 0;
-    width: 80px; margin-right: 0;
+    opacity: 0.6; transition: all 0.2s; width: 80px; flex-shrink: 0; margin-right: 20px;
 }
-.slider-track .outfit-item { margin-right: 20px; }
-.slider-track .outfit-item:last-child { margin-right: 0; }
-
-.outfit-item:hover { opacity: 1; transform: translateY(-3px); }
 .outfit-item.selected { opacity: 1; }
-
 .icon-box {
-    width: 70px; height: 70px; border-radius: 15px;
-    border: 2px solid #eee; margin-bottom: 10px;
-    display: flex; align-items: center; justify-content: center;
-    background-color: #fff; transition: all 0.2s;
-    overflow: hidden; padding: 10px;
+    width: 70px; height: 70px; border-radius: 15px; border: 2px solid #eee;
+    display: flex; align-items: center; justify-content: center; background-color: #fff; overflow: hidden;
 }
 .icon-box img { width: 100%; height: 100%; object-fit: contain; }
 
-.outfit-item.selected .icon-box {
-    border-color: #333; border-width: 3px;
-    background-color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-.outfit-item span { font-size: 15px; font-weight: 700; color: #555; white-space: nowrap; }
-
-/* --- [아이템] 색상 (원형 + 체크표시) --- */
-.color-slider-wrapper { padding-left: 40px; }
-.color-item {
-    display: flex; flex-direction: column; align-items: center; cursor: pointer; flex-shrink: 0;
-    width: 50px; margin-right: 15px; transition: transform 0.2s;
-}
-.color-item:hover { transform: translateY(-3px); }
-
-.color-circle {
-    width: 35px; height: 35px; border-radius: 50%;
-    border: 1px solid #ddd; margin-bottom: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center;
-}
-
-.color-item.selected .color-circle {
-    border-color: #ddd; opacity: 0.7; transform: scale(1.1);
-}
-.color-item.selected .color-circle::after {
-    content: '✓'; color: white; font-size: 20px; font-weight: bold;
-    text-shadow: 0 0 3px rgba(0, 0, 0, 0.9);
-}
-.color-item span { font-size: 10px; color: #666; letter-spacing: -0.5px; }
-
-/* --- 미리보기 이미지 --- */
-.preview-container { display: flex; gap: 12px; padding-top: 15px; }
-
 .preview-box {
-    width: 110px; height: 150px; border-radius: 40px; font-size: 12px;
-    background-color: #e0e0e0; display: flex; align-items: center; justify-content: center; color: #777;
-
-    /* [추가됨] 클릭 가능 표시 및 부드러운 전환 */
-    cursor: pointer;
-    transition: all 0.2s;
-    border: 3px solid transparent; /* 선택 시 테두리를 위해 미리 투명 테두리 확보 */
-    box-sizing: border-box; /* 테두리가 생겨도 박스 크기 유지 */
+    width: 110px; height: 150px; border-radius: 40px; background-color: #e0e0e0;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;
 }
+.preview-box.selected { border: 3px solid #673ab7; background-color: #fff; }
 
-/* 마우스 올렸을 때 효과 */
-.preview-box:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-/* [추가됨] 선택되었을 때 스타일 (보라색 진한 테두리) */
-.preview-box.selected {
-    border-color: #673ab7; /* 진한 보라색 */
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(103, 58, 183, 0.3);
-}
-
-.refresh-icon {
-    font-size: 28px; color: #555; cursor: pointer; align-self: center; margin-left: 10px;
-    transition: transform 0.4s ease;
-}
-.refresh-icon:hover { transform: rotate(180deg); color: #333; }
-
-/* --- 완료 버튼 --- */
-.submit-container { text-align: right; margin-top: 50px; margin-right: 25px; }
 .submit-btn {
     background-color: #673ab7; color: white; padding: 10px 40px;
     border-radius: 25px; border: none; font-size: 16px; cursor: pointer;
 }
-.submit-btn:hover { background-color: #5e35b1; }
 
-/* ui/static/ui/style.css - 기존 내용 아래에 추가하세요 */
 
-/* =========================================
-   결과 페이지 (Result Page) 스타일
-   ========================================= */
+/* ============================================================
+   2. 결과 페이지 전용 스타일 (그림 스케치 반영)
+   ============================================================ */
 
-/* --- 전체 레이아웃 --- */
-.result-container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding-bottom: 100px;
-}
+.result-container { max-width: 1100px; margin: 0 auto; padding: 20px 20px 100px 20px; }
+.page-subtitle { text-align: center; color: #666; margin-bottom: 10px; font-size: 16px; }
+.section-header { text-align: center; font-size: 22px; font-weight: 600; margin-bottom: 60px; }
 
-.page-subtitle {
-    text-align: center;
-    color: #666;
-    margin-bottom: 50px;
-    font-size: 16px;
-}
-
-.section-header {
-    text-align: center;
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 40px;
-}
-
-/* --- [1] 분석 결과 섹션 (상단) --- */
-.analysis-section {
+/* [상단] 옷 이미지(1) + LLM 설명(3) 가로 배치 */
+.analysis-horizontal-box {
     display: flex;
-    justify-content: center;
-    gap: 50px;
+    gap: 40px;
     margin-bottom: 80px;
-    align-items: center;
+    align-items: stretch; /* 높이 통일 */
 }
 
-/* 왼쪽: 분석된 스타일 이미지 박스 */
-.analysis-img-box {
-    width: 300px;
-    height: 300px;
-    background-color: #e0e0e0;
+.clothing-img-box {
+    flex: 1; /* 그림의 1번 영역 */
+    min-height: 380px;
+    background-color: #f8f8f8;
     border-radius: 20px;
-    display: flex; align-items: center; justify-content: center;
-    color: #888; font-size: 14px;
-    overflow: hidden;
-}
-.analysis-img-box img { width: 100%; height: 100%; object-fit: cover; }
-
-/* 오른쪽: 텍스트 설명 */
-.analysis-text {
-    width: 400px;
-}
-.analysis-text h3 { font-size: 20px; margin-bottom: 20px; font-weight: bold; }
-.analysis-text p {
-    font-size: 15px;
-    line-height: 1.8;
-    color: #444;
-    margin-bottom: 10px;
-}
-
-/* --- [2] TOP 3 리스트 섹션 (하단) --- */
-.top3-header {
-    font-size: 20px; font-weight: bold; margin-bottom: 30px;
-    display: flex; align-items: center; gap: 10px;
-}
-
-.perfume-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 30px 0;
-    border-bottom: 1px solid #eee;
-}
-.perfume-item:last-child { border-bottom: none; }
-
-/* 향수 정보 (왼쪽) */
-.perfume-info {
-    display: flex;
-    gap: 30px;
-    align-items: center;
-}
-
-.perfume-img {
-    width: 100px; height: 130px;
-    background-color: #f0f0f0;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    color: #aaa; font-size: 12px;
-}
-
-.perfume-text h4 { font-size: 22px; margin-bottom: 8px; font-weight: 500; }
-.perfume-text .brand { font-size: 16px; color: #666; margin-bottom: 8px; display: block;}
-.perfume-text .tags { font-size: 14px; color: #888; }
-
-/* 향수 차트 (오른쪽 점수표) */
-.scent-chart {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    font-size: 12px;
-    color: #555;
-}
-.chart-row {
-    display: flex;
     align-items: center;
-    justify-content: space-between;
-    width: 180px;
-}
-.chart-label { width: 60px; }
-
-/* 점(Dot) 스타일 */
-.dots { display: flex; gap: 6px; }
-.dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    border: 1px solid #333;
-    display: inline-block;
-}
-.dot.filled { background-color: #333; }
-.dot.empty { background-color: transparent; }
-
-/* ui/static/ui/style.css - 맨 아래 추가 */
-
-/* --- [3] Gift Card 섹션 (For Someone 전용) --- */
-.gift-section {
-    margin-top: 80px;
-    border-top: 1px solid #eee;
-    padding-top: 60px;
+    justify-content: center;
+    border: 1px solid #eee;
+    color: #999;
 }
 
-.gift-header {
-    font-size: 22px; font-weight: 600; margin-bottom: 40px;
-}
-
-.gift-layout {
+.llm-explanation-box {
+    flex: 1.5; /* 그림의 3번 영역 (더 넓게) */
+    padding: 40px;
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f0;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 50px;
+    flex-direction: column;
+    justify-content: center;
 }
 
-/* 왼쪽: 옵션 선택 */
-.gift-options {
-    flex: 1;
-}
-.gift-options h4 { font-size: 16px; margin-bottom: 20px; font-weight: bold; }
+.llm-explanation-box h3 { font-size: 22px; margin-bottom: 20px; font-weight: bold; color: #333; }
+.llm-explanation-box p { font-size: 16px; line-height: 1.9; color: #555; }
 
-/* 오른쪽: 카드 미리보기 */
-.gift-preview-area {
+/* [하단] 향수 TOP 3 카드 (가로 그리드 배치) */
+.perfume-grid-container { margin-top: 60px; }
+.grid-title { font-size: 20px; font-weight: bold; margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
+
+.perfume-cards-wrapper {
     display: flex;
-    align-items: flex-end; /* 리롤 버튼을 하단에 맞춤 */
-    gap: 15px;
+    gap: 25px;
+    justify-content: space-between;
 }
 
-.card-box {
-    width: 400px;
+.perfume-card {
+    flex: 1; /* 그림의 2번 영역 (3개 나란히) */
+    background: #fff;
+    border-radius: 20px;
+    border: 1px solid #eee;
+    overflow: hidden;
+    text-align: center;
+    transition: all 0.3s ease;
+    padding-bottom: 25px;
+}
+
+.perfume-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+
+.perfume-img-slot {
+    width: 100%;
     height: 300px;
-    background-color: #f5f5f5; /* 비어있는 상태 배경색 */
-    border: 1px dashed #ccc;   /* 점선 테두리로 '비어있음' 표시 */
-    border-radius: 10px;
+    background-color: #fbfbfb;
     display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    padding: 40px;
-    color: #888;
-    font-size: 14px;
-    line-height: 1.6;
-    font-family: serif; /* 편지 느낌 */
+    color: #ccc;
+    border-bottom: 1px solid #f5f5f5;
 }
 
+.perfume-details { padding: 25px 15px; }
+.p-name { font-size: 19px; font-weight: 600; margin-bottom: 8px; color: #222; }
+.p-brand { font-size: 15px; color: #777; margin-bottom: 15px; }
+.p-season {
+    font-size: 13px; color: #673ab7; font-weight: 500;
+    background: #f3effb; padding: 5px 15px; border-radius: 15px; display: inline-block;
+}
+
+/* 모바일 대응 */
+@media (max-width: 850px) {
+    .analysis-horizontal-box, .perfume-cards-wrapper { flex-direction: column; }
+    .clothing-img-box { min-height: 300px; }
+}
