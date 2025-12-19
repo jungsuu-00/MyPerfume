@@ -1,9 +1,7 @@
 import pandas as pd
-import pandas as pd
 import math
 import re
 import joblib
-
 
 def recommend_perfumes(
     user_info: list[dict],
