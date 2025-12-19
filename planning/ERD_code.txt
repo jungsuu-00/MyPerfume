@@ -1,0 +1,126 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table user_info {
+  사용자_식별자 integer [primary key]
+  상의_식별자 integer //[fk] 상의_하의 식별자로
+  상의_카테고리 varchar(100)
+  상의_색상 varcahr(100)
+  하의_식별자 integer //[fk] 상의_하의 식별자로
+  하의_색상 varchar(100)
+  하의_카테고리 varchar(100)
+  원피스_식별자 integer //[fk] 원피스 식별자로
+  원피스_색상 varchar(100)
+  계절 varchar(50)
+  비선호_향조 varchar(50)
+}
+
+Table score {
+  perfume_id integer [primary key]
+  season_score float
+  color_score float
+  style_score float
+  myscore float
+}
+
+
+Table 상의_하의 {
+  식별자 integer [primary key]
+  스타일 varchar(100)
+  서브스타일 varchar(100)
+  상의_색상 varchar(100)
+  상의_카테고리 varchar(100)
+  상의_소매기장 varchar(100)
+  상의_소재 varchar(100)
+  상의_프린트 varchar(100)
+  상의_넥라인 varchar(100)
+  상의_핏 varchar(100)
+  하의_기장 varchar(100)
+  하의_색상 varchar(100)
+  하의_카테고리 varchar(100)
+  하의_소재 varchar(100)
+  하의_핏 varchar(100)
+}
+
+Table 원피스 {
+  식별자 int [pk]
+  스타일 varchar(100)
+  서브스타일 varchar(100)
+  원피스_기장 varchar(100)
+  원피스_색상 varchar(100)
+  원피스_소매기장 varchar(100)
+  원피스_소재 varchar(100)
+  원피스_프린트 varchar(100)
+  원피스_핏 varchar(100)
+  원피스_디테일 varchar(255) 
+}
+
+Table clothes_color{
+  color varchar(100) [pk]
+  rgb_tuple varchar(100)
+}
+
+
+Ref: "user_info"."상의_식별자" > "상의_하의"."식별자"
+
+Ref: "user_info"."하의_식별자" > "상의_하의"."식별자"
+
+Ref: "user_info"."원피스_식별자" > "원피스"."식별자"
+
+
+//
+Table perfume_season {
+  perfume_id integer [primary key]
+  spring float
+  summer float
+  fall float
+  winter float
+}
+
+Table perfume_color {
+  mainaccord varchar [primary key]
+  color varchar
+}
+
+Table perfume_classification {
+  perfume_id integer [primary key]
+  fragrance varchar
+}
+
+
+Table perfume {
+  perfume_id     int           [pk]               // 향수_ID
+  url            varchar(500)                     // 상세_URL
+  Perfume        varchar(100)                     // 향수명
+  Brand          varchar(50)                      // 브랜드명
+  Country        varchar(50)
+  Gender         varchar(3)                      // 성별 (women/men/unisex 등, 길이는 여유있게)
+  RatingValue   float(3,2)                       // 평균평점
+  RatingCount   int                              // 평점개수
+  Year     int
+  Top      text                             // 탑노트
+  Middle   text                             // 미들노트
+  Base     text                             // 베이스노트
+  mainaccord1   varchar(20)                      // 메인어코드1
+  mainaccord2   varchar(20)                      // 메인어코드2
+  mainaccord3   varchar(20)                      // 메인어코드3
+  mainaccord4   varchar(20)                      // 메인어코드4
+  mainaccord5   varchar(20)                      // 메인어코드5
+}
+
+Ref: perfume_season.perfume_id > perfume.perfume_id
+Ref: perfume_classification.perfume_id > perfume.perfume_id
+Ref: "perfume_color"."mainaccord" > "perfume"."mainaccord1"
+Ref: "perfume_color"."mainaccord" > "perfume"."mainaccord2"
+Ref: "perfume_color"."mainaccord" > "perfume"."mainaccord3"
+
+//Ref: "score"."perfume_id" > "perfume"."perfume_id"
+
+
+Ref: "clothes_color"."color" < "원피스"."원피스_색상"
+
+Ref: "clothes_color"."color" < "상의_하의"."상의_색상"
+
+Ref: "clothes_color"."color" < "상의_하의"."하의_색상"
+
+Ref: "perfume"."perfume_id" > "score"."perfume_id"

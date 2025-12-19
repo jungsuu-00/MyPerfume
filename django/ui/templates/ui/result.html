@@ -1,0 +1,101 @@
+{% extends 'ui/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- CSS 파일 연결 (캐시 방지를 위해 버전 ?v=6 으로 설정) -->
+<link rel="stylesheet" type="text/css" href="{% static 'ui/style.css' %}?v=6">
+
+<div class="result-container">
+    
+    <!-- 헤더 -->
+    <div style="text-align: center; margin-top: 40px; margin-bottom: 60px;">
+        <h1 class="page-title">My Perfume</h1>
+        <p class="page-subtitle">당신의 향을 찾으세요</p>
+        <h2 class="section-header">For Me, 지금의 나에게 어울리는 향은?</h2>
+    </div>
+
+    <!-- [1] 분석 결과 (이미지 + 텍스트) -->
+    <div class="analysis-section">
+        <!-- 분석 이미지 -->
+        <div class="analysis-img-box">
+            Analysis Image
+        </div>
+
+        <!-- 분석 텍스트 -->
+        <div class="analysis-text">
+            <h3>분석결과</h3>
+            <p>
+                당신은<br>
+                - (연령대) (성별)으로 (스타일) 스타일을 선호해요.<br>
+                - 선택한 코디의 포인트에서도 산뜻한 무드가 드러났습니다.<br>
+                - 취향 분석에서는 (향기 계열)을 좋아하는 경향이 나타나,<br>
+                이런 특징과 시즌 분위기에 맞춰 향수를 추천해드렸습니다.
+            </p>
+        </div>
+    </div>
+
+    <!-- [2] TOP 3 추천 리스트 -->
+    <div class="top3-container">
+        <div class="top3-header">TOP3 Quick Pick <span class="material-icons">arrow_forward</span></div>
+
+        <!-- 향수 1 -->
+        <div class="perfume-item">
+            <div class="perfume-info">
+                <div class="perfume-img">Img</div>
+                <div class="perfume-text">
+                    <h4>Perfume Name 1</h4>
+                    <span class="brand">Brand Name</span>
+                    <span class="tags">4.5 • Unisex • Summer</span>
+                </div>
+            </div>
+            <!-- 차트 -->
+            <div class="scent-chart">
+                <div class="chart-row"><span class="chart-label">Fresh</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span></div></div>
+                <div class="chart-row"><span class="chart-label">Floral</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
+                <div class="chart-row"><span class="chart-label">Citrus</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
+                <div class="chart-row"><span class="chart-label">Woody</span><div class="dots"><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
+                <div class="chart-row"><span class="chart-label">Powdery</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
+            </div>
+        </div>
+
+        <!-- 향수 2 -->
+        <div class="perfume-item">
+            <div class="perfume-info">
+                <div class="perfume-img">Img</div>
+                <div class="perfume-text">
+                    <h4>Perfume Name 2</h4>
+                    <span class="brand">Brand Name</span>
+                    <span class="tags">4.2 • Female • Spring</span>
+                </div>
+            </div>
+            <div class="scent-chart">
+                <div class="chart-row"><span class="chart-label">Fresh</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
+                <div class="chart-row"><span class="chart-label">Floral</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span></div></div>
+                <div class="chart-row"><span class="chart-label">Citrus</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
+                <div class="chart-row"><span class="chart-label">Woody</span><div class="dots"><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
+                <div class="chart-row"><span class="chart-label">Powdery</span><div class="dots"><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
+            </div>
+        </div>
+
+        <!-- 향수 3 -->
+        <div class="perfume-item">
+            <div class="perfume-info">
+                <div class="perfume-img">Img</div>
+                <div class="perfume-text">
+                    <h4>Perfume Name 3</h4>
+                    <span class="brand">Brand Name</span>
+                    <span class="tags">4.8 • Male • Winter</span>
+                </div>
+            </div>
+            <div class="scent-chart">
+                <div class="chart-row"><span class="chart-label">Fresh</span><div class="dots"><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
+                <div class="chart-row"><span class="chart-label">Floral</span><div class="dots"><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
+                <div class="chart-row"><span class="chart-label">Citrus</span><div class="dots"><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
+                <div class="chart-row"><span class="chart-label">Woody</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span><span class="dot filled"></span></div></div>
+                <div class="chart-row"><span class="chart-label">Powdery</span><div class="dots"><span class="dot filled"></span><span class="dot filled"></span><span class="dot empty"></span><span class="dot empty"></span><span class="dot empty"></span></div></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
