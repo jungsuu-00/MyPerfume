@@ -232,7 +232,7 @@ def recommend_perfumes(
     # =========================================================
     # C. 계절
     # =========================================================
-    season_map = {"봄": "spring", "여름": "summer", "가을": "fall", "겨울": "winter"}
+    # season_map = {"봄": "spring", "여름": "summer", "가을": "fall", "겨울": "winter"}
     user_season = season_map[user_row["계절"]]
 
     season_df["season_score"] = season_df[user_season] / (
