@@ -7,7 +7,6 @@ from django.db import models
 
 class ClothesColor(models.Model):
     # Table: clothes_color
-    # color varchar(100) [pk]
     color = models.CharField(max_length=100, primary_key=True, db_column="color")
     rgb_tuple = models.CharField(max_length=100, null=True, blank=True, db_column="rgb_tuple")
 
@@ -21,7 +20,6 @@ class ClothesColor(models.Model):
 
 class PerfumeColor(models.Model):
     # Table: perfume_color
-    # mainaccord varchar [primary key]
     mainaccord = models.CharField(max_length=255, primary_key=True, db_column="mainaccord")
     color = models.CharField(max_length=255, null=True, blank=True, db_column="color")
 
@@ -39,13 +37,9 @@ class PerfumeColor(models.Model):
 
 class TopBottom(models.Model):
     # Table: 상의_하의
-    # 식별자 integer [primary key]
     id = models.AutoField(primary_key=True, db_column="식별자")
-
     style = models.CharField(max_length=100, null=True, blank=True, db_column="스타일")
     sub_style = models.CharField(max_length=100, null=True, blank=True, db_column="서브스타일")
-
-    # [FK] 상의_색상 -> clothes_color.color
     top_color = models.ForeignKey(ClothesColor, on_delete=models.PROTECT, related_name="top_set", null=True, blank=True,
                                   db_column="상의_색상")
     top_category = models.CharField(max_length=100, null=True, blank=True, db_column="상의_카테고리")
@@ -54,15 +48,12 @@ class TopBottom(models.Model):
     top_print = models.CharField(max_length=100, null=True, blank=True, db_column="상의_프린트")
     top_neckline = models.CharField(max_length=100, null=True, blank=True, db_column="상의_넥라인")
     top_fit = models.CharField(max_length=100, null=True, blank=True, db_column="상의_핏")
-
     bottom_length = models.CharField(max_length=100, null=True, blank=True, db_column="하의_기장")
-    # [FK] 하의_색상 -> clothes_color.color
     bottom_color = models.ForeignKey(ClothesColor, on_delete=models.PROTECT, related_name="bottom_set", null=True,
                                      blank=True, db_column="하의_색상")
     bottom_category = models.CharField(max_length=100, null=True, blank=True, db_column="하의_카테고리")
     bottom_material = models.CharField(max_length=100, null=True, blank=True, db_column="하의_소재")
     bottom_fit = models.CharField(max_length=100, null=True, blank=True, db_column="하의_핏")
-
 
     class Meta:
         db_table = "상의_하의"
@@ -71,14 +62,10 @@ class TopBottom(models.Model):
 
 class Dress(models.Model):
     # Table: 원피스
-    # 식별자 int [pk]
     id = models.AutoField(primary_key=True, db_column="식별자")
-
     style = models.CharField(max_length=100, null=True, blank=True, db_column="스타일")
     sub_style = models.CharField(max_length=100, null=True, blank=True, db_column="서브스타일")
-
     dress_length = models.CharField(max_length=100, null=True, blank=True, db_column="원피스_기장")
-    # [FK] 원피스_색상 -> clothes_color.color
     dress_color = models.ForeignKey(ClothesColor, on_delete=models.PROTECT, related_name="dress_set", null=True,
                                     blank=True, db_column="원피스_색상")
     dress_sleeve_length = models.CharField(max_length=100, null=True, blank=True, db_column="원피스_소매기장")
@@ -94,43 +81,29 @@ class Dress(models.Model):
 
 class UserInfo(models.Model):
     # Table: user_info
-    # 사용자_식별자 integer [primary key]
     user_id = models.AutoField(primary_key=True, db_column="사용자_식별자")
 
-
-    top_id = models.ForeignKey(TopBottom, on_delete=models.SET_NULL, related_name="user_tops", null=True, blank=True, db_column="상의_식별자")
+    # 상의 관련
+    top_id = models.ForeignKey(TopBottom, on_delete=models.SET_NULL, related_name="user_tops", null=True, blank=True,
+                               db_column="상의_식별자")
     top_color = models.CharField(max_length=100, null=True, blank=True, db_column="상의_색상")
     top_category = models.CharField(max_length=100, null=True, blank=True, db_column="상의_카테고리")
-
-    bottom_id = models.ForeignKey(TopBottom, on_delete=models.SET_NULL, related_name="user_bottoms", null=True, blank=True, db_column="하의_식별자")
-    bottom_color = models.CharField(max_length=100, null=True, blank=True, db_column="하의_색상")
-    bottom_category = models.CharField(max_length=100, null=True, blank=True, db_column="하의_카테고리")
-
-    dress_id = models.ForeignKey(Dress, on_delete=models.SET_NULL, related_name="user_dresses", null=True, blank=True,db_column="원피스_식별자")
-    dress_color = models.CharField(max_length=100, null=True, blank=True, db_column="원피스_색상")
-
-    season = models.CharField(max_length=50, null=True, blank=True, db_column="계절")
-
-    disliked_accord = models.CharField(max_length=50, null=True, blank=True, db_column="비선호_향조")
-
-    # --- 추가: 상의 이미지 경로 저장용 ---
     top_img = models.CharField(max_length=500, null=True, blank=True, db_column="상의_이미지_경로")
 
+    # 하의 관련
     bottom_id = models.ForeignKey(TopBottom, on_delete=models.SET_NULL, related_name="user_bottoms", null=True,
                                   blank=True, db_column="하의_식별자")
     bottom_color = models.CharField(max_length=100, null=True, blank=True, db_column="하의_색상")
     bottom_category = models.CharField(max_length=100, null=True, blank=True, db_column="하의_카테고리")
-
-    # --- 추가: 하의 이미지 경로 저장용 ---
     bottom_img = models.CharField(max_length=500, null=True, blank=True, db_column="하의_이미지_경로")
 
+    # 원피스 관련
     dress_id = models.ForeignKey(Dress, on_delete=models.SET_NULL, related_name="user_dresses", null=True, blank=True,
                                  db_column="원피스_식별자")
     dress_color = models.CharField(max_length=100, null=True, blank=True, db_column="원피스_색상")
-
-    # --- 추가: 원피스 이미지 경로 저장용 ---
     dress_img = models.CharField(max_length=500, null=True, blank=True, db_column="원피스_이미지_경로")
 
+    # 공통 설정
     season = models.CharField(max_length=50, null=True, blank=True, db_column="계절")
     disliked_accord = models.CharField(max_length=50, null=True, blank=True, db_column="비선호_향조")
 
@@ -145,25 +118,19 @@ class UserInfo(models.Model):
 
 class Perfume(models.Model):
     # Table: perfume
-    # perfume_id int [pk]
-    perfume_id = models.IntegerField(primary_key=True,
-                                     db_column="perfume_id")  # AutoField 대신 CSV ID 유지를 위해 IntegerField 추천
-
+    perfume_id = models.IntegerField(primary_key=True, db_column="perfume_id")
     url = models.CharField(max_length=500, null=True, blank=True, db_column="url")
     perfume_name = models.CharField(max_length=100, db_column="Perfume")
     brand = models.CharField(max_length=50, db_column="Brand")
     country = models.CharField(max_length=50, null=True, blank=True, db_column="Country")
     gender = models.CharField(max_length=20, null=True, blank=True, db_column="Gender")
-
     rating_value = models.FloatField(default=0.0, db_column="RatingValue")
     rating_count = models.IntegerField(default=0, db_column="RatingCount")
     year = models.IntegerField(null=True, blank=True, db_column="Year")
-
     top = models.TextField(null=True, blank=True, db_column="Top")
     middle = models.TextField(null=True, blank=True, db_column="Middle")
     base = models.TextField(null=True, blank=True, db_column="Base")
 
-    # [FK] Main Accords -> perfume_color.mainaccord
     mainaccord1 = models.ForeignKey(PerfumeColor, on_delete=models.SET_NULL, related_name="p_accord1", null=True,
                                     blank=True, db_column="mainaccord1")
     mainaccord2 = models.ForeignKey(PerfumeColor, on_delete=models.SET_NULL, related_name="p_accord2", null=True,
@@ -185,7 +152,6 @@ class Perfume(models.Model):
 
 class PerfumeSeason(models.Model):
     # Table: perfume_season
-    # perfume_id integer [primary key] -> OneToOne with Perfume
     perfume = models.OneToOneField(Perfume, primary_key=True, on_delete=models.CASCADE, related_name="season",
                                    db_column="perfume_id")
     spring = models.FloatField(default=0.0, db_column="spring")
@@ -200,7 +166,6 @@ class PerfumeSeason(models.Model):
 
 class PerfumeClassification(models.Model):
     # Table: perfume_classification
-    # perfume_id integer [primary key] -> OneToOne with Perfume
     perfume = models.OneToOneField(Perfume, primary_key=True, on_delete=models.CASCADE, related_name="classification",
                                    db_column="perfume_id")
     fragrance = models.CharField(max_length=255, null=True, blank=True, db_column="fragrance")
@@ -211,15 +176,39 @@ class PerfumeClassification(models.Model):
 
 
 class Score(models.Model):
-    # Table: score
-    # perfume_id integer [primary key] -> OneToOne with Perfume
-    perfume = models.OneToOneField(Perfume, primary_key=True, on_delete=models.CASCADE, related_name="score",
-                                   db_column="perfume_id")
-    season_score = models.FloatField(default=0.0, db_column="season_score")
-    color_score = models.FloatField(default=0.0, db_column="color_score")
-    style_score = models.FloatField(default=0.0, db_column="style_score")
-    myscore = models.FloatField(default=0.0, db_column="myscore")
+    # 1. 고유 식별자 ID (기본키) 추가
+    id = models.AutoField(primary_key=True, db_column="id")
+
+    # 2. 어떤 사용자의 점수인가 (외래키)
+    user = models.ForeignKey(
+        'UserInfo',
+        on_delete=models.CASCADE,
+        db_column="user_id",
+        related_name="scores"
+    )
+
+    # 3. 어떤 향수의 점수인가 (외래키)
+    perfume = models.ForeignKey(
+        'Perfume',
+        on_delete=models.CASCADE,
+        db_column="perfume_id",
+        related_name="scores"
+    )
+
+    # 점수 데이터 필드 (ERD 내용 유지)
+    season_score = models.FloatField(null=True, blank=True, db_column="season_score")
+    color_score = models.FloatField(null=True, blank=True, db_column="color_score")
+    style_score = models.FloatField(null=True, blank=True, db_column="style_score")
+    myscore = models.FloatField(null=True, blank=True, db_column="myscore")
+
+    # 사용자 스타일 정보
+    user_style = models.CharField(max_length=50, null=True, blank=True, db_column="user_style")
 
     class Meta:
         db_table = "score"
         app_label = 'ui'
+        # [핵심] ID는 따로 있지만, 한 유저가 같은 향수에 대해 중복 점수를 갖지 않도록 보장
+        unique_together = (('user', 'perfume'),)
+
+    def __str__(self):
+        return f"Score ID:{self.id} (User:{self.user_id} - Perfume:{self.perfume_id})"
