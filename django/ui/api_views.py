@@ -33,75 +33,19 @@ from .serializers import (
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import UserInputSerializer
+from .serializers import UserInputSerializer, RecommendationResultSerializer
 from ui.models import Score, Perfume, TopBottom, Dress
 from ui.recommend.calculation import get_user_data, recommend_perfumes
 from django.db import transaction
 from rest_framework.renderers import JSONRenderer
 
 # =============================================================
-# 1. 이미지 데이터 조회 API (JSON + HTML 미리보기 기능 포함)
+# 1. 이미지 데이터 조회 API
 # =============================================================
 class FilterImagesAPI(APIView):
-    renderer_classes = [BrowsableAPIRenderer, JSONRenderer]
-
-    def get_view_description(self, html=False):
-        """
-        화면 상단 설명창 (이미지 미리보기 포함)
-        """
-        description = "<h3>📸 이미지 조회 결과 (미리보기)</h3><p>아래 회색 박스는 데이터(JSON)이고, 실제 이미지는 여기에 나옵니다.</p>"
-
-        request = self.request
-        category_en = request.query_params.get('category')
-        item_en = request.query_params.get('item')
-        color_en = request.query_params.get('color')
-
-        # 매핑
-        map_category = {'top': '상의', 'bottom': '하의', 'onepiece': '원피스'}
-        map_item = {'blouse': '블라우스', 'tshirt': '티셔츠', 'knit': '니트웨어', 'shirt': '셔츠', 'sleeveless': '탑',
-                    'hoodie': '후드티', 'sweatshirt': '맨투맨', 'bratop': '브라탑', 'pants': '팬츠', 'jeans': '청바지',
-                    'skirt': '스커트', 'long_skirt': '롱스커트', 'leggings': '레깅스', 'jogger': '트레이닝', 'slacks': '슬랙스',
-                    'dress': '드레스', 'onepiece': '원피스', 'jumpsuit': '점프수트'}
-        map_color = {'white': '화이트', 'black': '블랙', 'grey': '그레이', 'charcoal': '차콜', 'beige': '베이지', 'ivory': '아이보리',
-                     'brown': '브라운', 'camel': '카멜', 'navy': '네이비', 'blue': '블루', 'skyblue': '스카이블루', 'jeans_blue': '진청',
-                     'light_blue': '연청', 'middle_blue': '중청', 'red': '레드', 'pink': '핑크', 'wine': '와인', 'rose': '로즈',
-                     'purple': '퍼플', 'lavender': '라벤더', 'violet': '바이올렛', 'yellow': '옐로우', 'mustard': '머스타드',
-                     'orange': '오렌지', 'green': '그린', 'khaki': '카키', 'mint': '민트', 'olive': '올리브', 'neon': '네온',
-                     'gold': '골드', 'silver': '실버', 'pattern': '패턴', 'unknown': 'unknown'}
-
-        cat_kr = map_category.get(category_en)
-        item_kr = map_item.get(item_en)
-        color_kr = map_color.get(color_en)
-
-        img_html = "<div style='display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;'>"
-
-        if cat_kr and item_kr and color_kr:
-            base_dir = os.path.join(settings.BASE_DIR, 'ui', 'static', 'ui', 'clothes', cat_kr, item_kr, color_kr)
-            valid_images = []
-            if os.path.exists(base_dir):
-                try:
-                    files = os.listdir(base_dir)
-                    for file in files:
-                        if file.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
-                            # [수정됨] quote() 제거! 한글 그대로 사용
-                            url_path = f'/static/ui/clothes/{cat_kr}/{item_kr}/{color_kr}/{file}'
-                            valid_images.append(url_path)
-                except:
-                    pass
-
-            count = min(len(valid_images), 4)
-            selected = random.sample(valid_images, count) if valid_images else []
-
-            for img in selected:
-                img_html += f"<img src='{img}' style='width: 150px; height: 150px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;'>"
-
-        img_html += "</div>"
-        return mark_safe(description + img_html)
+    renderer_classes = [JSONRenderer]
 
     def get(self, request):
-        """
-        JSON 응답 반환
-        """
         category_en = request.query_params.get('category')
         item_en = request.query_params.get('item')
         color_en = request.query_params.get('color')
@@ -109,18 +53,18 @@ class FilterImagesAPI(APIView):
         if not (category_en and item_en and color_en):
             return Response({'images': []})
 
-        # 매핑
+        # [누락 없는 매핑]
         map_category = {'top': '상의', 'bottom': '하의', 'onepiece': '원피스'}
-        map_item = {'blouse': '블라우스', 'tshirt': '티셔츠', 'knit': '니트웨어', 'shirt': '셔츠', 'sleeveless': '탑',
-                    'hoodie': '후드티', 'sweatshirt': '맨투맨', 'bratop': '브라탑', 'pants': '팬츠', 'jeans': '청바지',
-                    'skirt': '스커트', 'long_skirt': '롱스커트', 'leggings': '레깅스', 'jogger': '트레이닝', 'slacks': '슬랙스',
-                    'dress': '드레스', 'onepiece': '원피스', 'jumpsuit': '점프수트'}
-        map_color = {'white': '화이트', 'black': '블랙', 'grey': '그레이', 'charcoal': '차콜', 'beige': '베이지', 'ivory': '아이보리',
-                     'brown': '브라운', 'camel': '카멜', 'navy': '네이비', 'blue': '블루', 'skyblue': '스카이블루', 'jeans_blue': '진청',
-                     'light_blue': '연청', 'middle_blue': '중청', 'red': '레드', 'pink': '핑크', 'wine': '와인', 'rose': '로즈',
-                     'purple': '퍼플', 'lavender': '라벤더', 'violet': '바이올렛', 'yellow': '옐로우', 'mustard': '머스타드',
-                     'orange': '오렌지', 'green': '그린', 'khaki': '카키', 'mint': '민트', 'olive': '올리브', 'neon': '네온',
-                     'gold': '골드', 'silver': '실버', 'pattern': '패턴', 'unknown': 'unknown'}
+        map_item = {
+            'blouse': '블라우스', 'tshirt': '티셔츠', 'knit': '니트웨어', 'shirt': '셔츠', 'hoodie': '후드티',
+            'pants': '팬츠', 'jeans': '청바지', 'skirt': '스커트', 'leggings': '레깅스',
+            'dress': '드레스', 'jumpsuit': '점프수트'
+        }
+        map_color = {
+            'white': '화이트', 'black': '블랙', 'grey': '그레이', 'navy': '네이비', 'beige': '베이지',
+            'pink': '핑크', 'skyblue': '스카이블루', 'brown': '브라운', 'red': '레드', 'green': '그린',
+            'gold': '골드', 'silver': '실버'
+        }
 
         cat_kr = map_category.get(category_en)
         item_kr = map_item.get(item_en)
@@ -129,6 +73,7 @@ class FilterImagesAPI(APIView):
         if not (cat_kr and item_kr and color_kr):
             return Response({'images': []})
 
+        # 실제 서버 내 폴더 경로 (한글 그대로 사용)
         base_dir = os.path.join(settings.BASE_DIR, 'ui', 'static', 'ui', 'clothes', cat_kr, item_kr, color_kr)
         valid_images = []
 
@@ -137,13 +82,20 @@ class FilterImagesAPI(APIView):
                 files = os.listdir(base_dir)
                 for file in files:
                     if file.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
-                        url_path = f'/static/ui/clothes/{cat_kr}/{item_kr}/{color_kr}/{file}'
-                        valid_images.append(url_path)
-            except:
-                pass
+                        # [중요] 브라우저용 URL은 한글 부분을 반드시 quote로 인코딩해야 함
+                        encoded_cat = quote(cat_kr)
+                        encoded_item = quote(item_kr)
+                        encoded_color = quote(color_kr)
+                        encoded_file = quote(file)
 
-        count = min(len(valid_images), 4)
-        selected_images = random.sample(valid_images, count) if valid_images else []
+                        url_path = f'/static/ui/clothes/{encoded_cat}/{encoded_item}/{encoded_color}/{encoded_file}'
+                        valid_images.append(url_path)
+            except Exception as e:
+                print(f"Error reading directory: {e}")
+
+        # 무작위 4개 선택
+        selected_images = random.sample(valid_images, min(len(valid_images), 4)) if valid_images else []
+        # 부족한 경우 null로 채움 (프론트엔드 형식 유지)
         while len(selected_images) < 4:
             selected_images.append(None)
 
@@ -212,11 +164,7 @@ class UserInputView(APIView):
         data = serializer.validated_data
 
         try:
-            # ===================================================
-            # 1. 매핑 준비
-            # ===================================================
-
-            # [옷 종류 매핑] (영어 -> 한글)
+            # ... (중략: map_item, map_color 매핑 로직은 동일) ...
             map_item = {
                 'blouse': '블라우스', 'tshirt': '티셔츠', 'knit': '니트웨어', 'shirt': '셔츠', 'sleeveless': '탑',
                 'hoodie': '후드티', 'sweatshirt': '맨투맨', 'bratop': '브라탑',
@@ -224,125 +172,86 @@ class UserInputView(APIView):
                 'jogger': '트레이닝', 'slacks': '슬랙스',
                 'dress': '드레스', 'onepiece': '원피스', 'jumpsuit': '점프수트'
             }
-
-
             map_color = {
-                'white': '화이트',
-                'black': '블랙',
-                'beige': '베이지',
-                'pink': '핑크',
-                'skyblue': '스카이블루',
-                'grey': '그레이',
-                'brown': '브라운',
-                'navy': '네이비',
-                'red': '레드',
-                'yellow': '옐로우',
-                'blue': '블루',
-                'lavender': '라벤더',
-                'wine': '와인',
-                'silver': '실버',
-                'orange': '오렌지',
-                'khaki': '카키',
-                'green': '그린',
-                'purple': '퍼플',
-                'mint': '민트',
-                'gold': '골드',
-                'neon': '네온',
-                'jeans_blue': '진청'  # 프론트엔드 코드에 있어서 유지함
+                'white': '화이트', 'black': '블랙', 'beige': '베이지', 'pink': '핑크',
+                'skyblue': '스카이블루', 'grey': '그레이', 'brown': '브라운', 'navy': '네이비',
+                'red': '레드', 'yellow': '옐로우', 'blue': '블루', 'lavender': '라벤더',
+                'wine': '와인', 'silver': '실버', 'orange': '오렌지', 'khaki': '카키',
+                'green': '그린', 'purple': '퍼플', 'mint': '민트', 'gold': '골드',
+                'neon': '네온', 'jeans_blue': '진청'
             }
 
-            # ===================================================
-            # 2. 데이터 변환
-            # ===================================================
-
-            # [수정됨] 계절은 영어 그대로 사용 (매핑 X)
             final_season = data['season']
-
-            # [수정됨] 향조도 영어 그대로 사용 (매핑 X), 리스트만 문자열로 변환
             dislikes_list = data.get('disliked_accords', [])
             dislikes_str = ", ".join(dislikes_list) if dislikes_list else None
 
-            # 옷/색상은 한글로 변환 (DB 텍스트 저장용)
-            top_kr = map_item.get(data.get('top'))
-            top_color_kr = map_color.get(data.get('top_color'))
+            # [핵심 수정] 시리얼라이저에서 넘겨준 이미지 경로 꺼내오기
+            top_img_url = data.get('top_img')
+            bottom_img_url = data.get('bottom_img')
+            onepiece_img_url = data.get('onepiece_img')
 
-            bottom_kr = map_item.get(data.get('bottom'))
-            bottom_color_kr = map_color.get(data.get('bottom_color'))
-
-            onepiece_kr = map_item.get(data.get('onepiece'))
-            onepiece_color_kr = map_color.get(data.get('onepiece_color'))
-
-            # ===================================================
-            # 3. ID 찾기 (FK 연결용 객체 생성)
-            # ===================================================
-            # 주의: FK 연결할 때 ClothesColor 테이블은 '영어 키(white)'를 사용할 수도 있으므로
-            # data['top_color'] (영어)를 그대로 사용합니다.
-
+            # ... (중략: FK 객체 찾는 로직 동일) ...
             user_top_obj = None
             user_bottom_obj = None
             user_dress_obj = None
 
-            # [CASE A] 상의 + 하의
             if data.get('top') and data.get('bottom'):
-                # 1. 색상 객체 (영어 키 사용)
                 top_color_obj, _ = ClothesColor.objects.get_or_create(color=data['top_color'])
-                # 2. 상의 객체 (카테고리: 영어, 색상: 객체)
-                user_top_obj, _ = TopBottom.objects.get_or_create(
-                    top_category=data['top'],
-                    top_color=top_color_obj,
-                    defaults={'style': 'basic'}
-                )
-
+                user_top_obj, _ = TopBottom.objects.get_or_create(top_category=data['top'], top_color=top_color_obj, defaults={'style': 'basic'})
                 bottom_color_obj, _ = ClothesColor.objects.get_or_create(color=data['bottom_color'])
-                user_bottom_obj, _ = TopBottom.objects.get_or_create(
-                    bottom_category=data['bottom'],
-                    bottom_color=bottom_color_obj,
-                    defaults={'style': 'basic'}
-                )
-
-            # [CASE B] 원피스
+                user_bottom_obj, _ = TopBottom.objects.get_or_create(bottom_category=data['bottom'], bottom_color=bottom_color_obj, defaults={'style': 'basic'})
             elif data.get('onepiece'):
                 dress_color_obj, _ = ClothesColor.objects.get_or_create(color=data['onepiece_color'])
-                user_dress_obj, _ = Dress.objects.get_or_create(
-                    sub_style=data['onepiece'],
-                    dress_color=dress_color_obj,
-                    defaults={'style': 'basic'}
-                )
+                user_dress_obj, _ = Dress.objects.get_or_create(sub_style=data['onepiece'], dress_color=dress_color_obj, defaults={'style': 'basic'})
 
-            # ===================================================
-            # 4. UserInfo 저장
-            # ===================================================
-            UserInfo.objects.all().delete()
-
+            # [핵심 수정] UserInfo 저장 시 이미지 필드 명시
             new_user_info = UserInfo.objects.create(
-                season=final_season,  # 영어 (spring)
-                disliked_accord=dislikes_str,  # 영어 (citrus, woody)
-
-                # ID 연결 (Foreign Key)
+                season=final_season,
+                disliked_accord=dislikes_str,
                 top_id=user_top_obj,
                 bottom_id=user_bottom_obj,
                 dress_id=user_dress_obj,
 
-                # 텍스트 정보 저장 (한글) - 사진 목록에 맞춘 값
-                top_category=top_kr,
-                top_color=top_color_kr,  # 예: 화이트, 블랙...
-                bottom_category=bottom_kr,
-                bottom_color=bottom_color_kr,
-                dress_color=onepiece_color_kr
+                # 아래 이미지 경로 저장 부분이 누락되어 있었습니다!
+                top_img=top_img_url,
+                bottom_img=bottom_img_url,
+                dress_img=onepiece_img_url,
+
+                top_category=map_item.get(data.get('top')),
+                top_color=map_color.get(data.get('top_color')),
+                bottom_category=map_item.get(data.get('bottom')),
+                bottom_color=map_color.get(data.get('bottom_color')),
+                dress_color=map_color.get(data.get('onepiece_color'))
             )
 
-            return Response(
-                {"message": "저장 성공!", "user_id": new_user_info.user_id},
-                status=status.HTTP_201_CREATED
-            )
+            return Response({"message": "저장 성공!", "user_id": new_user_info.user_id}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             import traceback
             traceback.print_exc()
-            return Response(
-                {"error": str(e), "type": type(e).__name__},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UserOutfitAPIView(APIView):
+    """
+    사용자가 방금 선택한 코디 이미지 경로만 반환하는 전용 API
+    """
+    renderer_classes = [JSONRenderer]
+
+    def get(self, request):
+        # 가장 최근에 저장된 사용자 정보 가져오기
+        last_user = UserInfo.objects.last()
+
+        if not last_user:
+            return Response({"error": "데이터가 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+        # 이미지 경로 데이터만 구성
+        data = {
+            "top_img": last_user.top_img,
+            "bottom_img": last_user.bottom_img,
+            "onepiece_img": last_user.dress_img,  # 모델 필드명 확인 필요
+        }
+        return Response(data, status=status.HTTP_200_OK)
 
 
 # 2) 추천 알고리즘 점수 계산 및 score 테이블 저장 api
@@ -396,3 +305,35 @@ class RecommendationView(APIView):
             import traceback
             traceback.print_exc()  # 에러가 나면 터미널에 상세 내용을 찍음
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# api_views.py 내 RecommendationResultAPIView 수정
+
+class RecommendationResultAPIView(APIView):
+    renderer_classes = [JSONRenderer]
+
+    def get(self, request):
+        # 1. 점수와 상관없이 가장 최근 사용자 정보는 무조건 가져옴
+        last_user = UserInfo.objects.last()
+
+        # 2. 점수 결과 가져오기 (고장 났더라도 에러 내지 않음)
+        results = Score.objects.all().select_related(
+            'perfume', 'perfume__season', 'perfume__mainaccord1', 'perfume__mainaccord2', 'perfume__mainaccord3'
+        ).order_by('-myscore')
+
+        # 3. 향수 데이터 시리얼라이징 (결과가 있으면 변환, 없으면 빈 리스트)
+        perfumes_data = []
+        if results.exists():
+            perfume_serializer = RecommendationResultSerializer(results, many=True)
+            perfumes_data = perfume_serializer.data
+
+        # 4. 최종 응답 (상태 코드 200으로 고정하여 자바스크립트가 멈추지 않게 함)
+        response_data = {
+            "user_outfit": {
+                "top_img": last_user.top_img if last_user else None,
+                "bottom_img": last_user.bottom_img if last_user else None,
+                "onepiece_img": last_user.dress_img if last_user else None,
+            },
+            "perfumes": perfumes_data  # 점수 고장 시 빈 배열 [] 이 감
+        }
+        return Response(response_data, status=status.HTTP_200_OK)

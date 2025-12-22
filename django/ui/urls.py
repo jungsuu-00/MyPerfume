@@ -4,7 +4,7 @@ from .api_views import RecommendationView
 
 from . import views         # 화면용
 from . import api_views     # API용
-from .api_views import FilterImagesAPI, UserInputView # check_images_html
+from .api_views import FilterImagesAPI, UserInputView, RecommendationResultAPIView # check_images_html
 
 # ==========================================
 # 1. DRF 라우터 설정 (api_views 사용)
@@ -31,7 +31,8 @@ urlpatterns = [
     path('api/user-input/', UserInputView.as_view(), name='user-input'),
     path('api/recommend/', RecommendationView.as_view(), name='recommendation'),
     path('api/filter-images/', FilterImagesAPI.as_view(), name='filter-images'),
-    # path('api/recommend/guest/', api_views.GuestRecommendationAPIView.as_view(), name='guest_recommend'),
+    path('api/user-outfit/', api_views.UserOutfitAPIView.as_view(), name='user-outfit'),
+    path('api/recommendation-results/', api_views.RecommendationResultAPIView.as_view(), name='recommendation-results'),
 
 
     # ==========================================

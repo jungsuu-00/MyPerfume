@@ -297,9 +297,6 @@ class UserInfo(models.Model):
     # 사용자_식별자 integer [primary key]
     user_id = models.AutoField(primary_key=True, db_column="사용자_식별자")
 
-    # [FK] 상의/하의/원피스 식별자 연결
-
-
 
     top_id = models.ForeignKey(TopBottom, on_delete=models.SET_NULL, related_name="user_tops", null=True, blank=True, db_column="상의_식별자")
     top_color = models.CharField(max_length=100, null=True, blank=True, db_column="상의_색상")
@@ -314,6 +311,27 @@ class UserInfo(models.Model):
 
     season = models.CharField(max_length=50, null=True, blank=True, db_column="계절")
 
+    disliked_accord = models.CharField(max_length=50, null=True, blank=True, db_column="비선호_향조")
+
+    # --- 추가: 상의 이미지 경로 저장용 ---
+    top_img = models.CharField(max_length=500, null=True, blank=True, db_column="상의_이미지_경로")
+
+    bottom_id = models.ForeignKey(TopBottom, on_delete=models.SET_NULL, related_name="user_bottoms", null=True,
+                                  blank=True, db_column="하의_식별자")
+    bottom_color = models.CharField(max_length=100, null=True, blank=True, db_column="하의_색상")
+    bottom_category = models.CharField(max_length=100, null=True, blank=True, db_column="하의_카테고리")
+
+    # --- 추가: 하의 이미지 경로 저장용 ---
+    bottom_img = models.CharField(max_length=500, null=True, blank=True, db_column="하의_이미지_경로")
+
+    dress_id = models.ForeignKey(Dress, on_delete=models.SET_NULL, related_name="user_dresses", null=True, blank=True,
+                                 db_column="원피스_식별자")
+    dress_color = models.CharField(max_length=100, null=True, blank=True, db_column="원피스_색상")
+
+    # --- 추가: 원피스 이미지 경로 저장용 ---
+    dress_img = models.CharField(max_length=500, null=True, blank=True, db_column="원피스_이미지_경로")
+
+    season = models.CharField(max_length=50, null=True, blank=True, db_column="계절")
     disliked_accord = models.CharField(max_length=50, null=True, blank=True, db_column="비선호_향조")
 
     class Meta:

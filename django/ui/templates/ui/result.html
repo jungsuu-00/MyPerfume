@@ -2,81 +2,154 @@
 {% load static %}
 
 {% block content %}
-<!-- CSS 연결 -->
-<link rel="stylesheet" type="text/css" href="{% static 'ui/style.css' %}?v=10">
+<!-- 구글 마테리얼 아이콘 및 폰트 -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<!-- 기존 스타일 시트 (v2.2는 패션 카드 스타일이 포함된 버전임을 가정) -->
+<link rel="stylesheet" type="text/css" href="{% static 'ui/style.css' %}?v=2.2">
 
 <div class="result-container">
-
-    <!-- 헤더 -->
+    <!-- 1. 헤더 섹션 -->
     <div class="result-header" style="text-align: center; margin-top: 40px; margin-bottom: 60px;">
-        <h1 class="page-title">My Perfume</h1>
-        <p class="page-subtitle">당신의 향을 찾으세요</p>
+        <h1 class="page-title" style="text-align: center; padding: 0;">My Perfume</h1>
+        <p class="page-subtitle" style="text-align: center; color: #888; margin-bottom: 10px;">당신의 향을 찾으세요</p>
         <h2 class="section-header">For Me, 지금의 나에게 어울리는 향은?</h2>
     </div>
 
-    <!-- [상단] 그림의 1번(옷) + 3번(설명) 영역 -->
+    <!-- 2. 상단 분석 영역 (수평 배치) -->
     <div class="analysis-horizontal-box">
-        <!-- 1번 영역: 분석된 옷 이미지 -->
-        <div class="clothing-img-box">
-            <span class="material-icons" style="font-size: 60px; color: #ddd; margin-bottom: 15px;">checkroom</span>
-            <p style="font-size: 14px;">선택한 코디 이미지</p>
-            <!-- 나중에 <img src="..."> 로 대체 가능 -->
+        <!-- [좌측] 사용자가 선택한 코디 이미지 (패션 카드 레이아웃 적용 대상) -->
+        <div class="clothing-img-box" id="outfit-display-area">
+            <!-- 자바스크립트에서 이미지를 동적으로 채웁니다 -->
+            <div style="text-align: center;">
+                <span class="material-icons" style="font-size: 60px; color: #ddd;">checkroom</span>
+                <p style="font-size: 14px; color: #999;">코디를 불러오는 중...</p>
+            </div>
         </div>
 
-        <!-- 3번 영역: LLM 분석 설명 -->
+        <!-- [우측] 분석 결과 및 추천 이유 설명 -->
         <div class="llm-explanation-box">
             <h3>분석 결과 및 추천 이유</h3>
             <p>
                 오늘 선택하신 코디와 당신의 취향을 분석한 결과입니다.
-                차분한 색감의 의상에 맞춰 과하지 않으면서도 세련된 인상을 남길 수 있는 향기들을 선정했습니다.<br><br>
+                선택하신 의상의 무드와 색감을 고려하여, 당신의 인상을 더욱 완성시켜줄 최적의 향기를 찾아냈습니다.<br><br>
                 당신이 선호하는 향료와 현재 시즌의 분위기를 모두 고려하여,
                 오늘의 룩을 완벽하게 완성해줄 세 가지 향수를 제안해 드립니다.
             </p>
         </div>
     </div>
 
-    <!-- [하단] 그림의 2번 영역 (향수 3개 카드) -->
+    <!-- 3. 하단 향수 그리드 영역 -->
     <div class="perfume-grid-container">
-        <h3 class="grid-title">TOP3 Quick Pick <span class="material-icons" style="vertical-align: middle;">arrow_forward</span></h3>
-
-        <div class="perfume-cards-wrapper">
-            <!-- 향수 카드 1 -->
-            <div class="perfume-card">
-                <div class="perfume-img-slot">
-                    <span class="material-icons" style="font-size: 50px;">local_fire_department</span>
-                </div>
-                <div class="perfume-details">
-                    <h4 class="p-name">Perfume Name 1</h4>
-                    <p class="p-brand">Brand Name</p>
-                    <span class="p-season">#Summer #Unisex</span>
-                </div>
-            </div>
-
-            <!-- 향수 카드 2 -->
-            <div class="perfume-card">
-                <div class="perfume-img-slot">
-                    <span class="material-icons" style="font-size: 50px;">eco</span>
-                </div>
-                <div class="perfume-details">
-                    <h4 class="p-name">Perfume Name 2</h4>
-                    <p class="p-brand">Brand Name</p>
-                    <span class="p-season">#Spring #Female</span>
-                </div>
-            </div>
-
-            <!-- 향수 카드 3 -->
-            <div class="perfume-card">
-                <div class="perfume-img-slot">
-                    <span class="material-icons" style="font-size: 50px;">water_drop</span>
-                </div>
-                <div class="perfume-details">
-                    <h4 class="p-name">Perfume Name 3</h4>
-                    <p class="p-brand">Brand Name</p>
-                    <span class="p-season">#Winter #Male</span>
-                </div>
-            </div>
+        <h3 class="grid-title">
+            TOP3 Quick Pick
+            <span class="material-icons" style="vertical-align: middle; font-size: 18px;">arrow_forward</span>
+        </h3>
+        <div class="perfume-cards-wrapper" id="perfume-results-container">
+            <!-- 자바스크립트에서 추천 향수 카드를 동적으로 채웁니다 -->
+            <p style="text-align: center; width: 100%; color: #999; padding: 50px;">향수를 찾고 있습니다...</p>
         </div>
     </div>
-
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    // =============================================================
+    // [기능 1] 옷 이미지 API 호출 (별도 API)
+    // =============================================================
+    fetch('/api/user-outfit/')
+        .then(res => {
+            if (!res.ok) throw new Error("이미지 데이터 없음");
+            return res.json();
+        })
+        .then(data => {
+            const outfitArea = document.getElementById('outfit-display-area');
+            outfitArea.innerHTML = ''; // 로딩 메시지 제거
+
+            // 원피스가 선택된 경우
+            if (data.onepiece_img) {
+                outfitArea.innerHTML = `
+                    <img src="${data.onepiece_img}" class="outfit-card onepiece-card" alt="선택한 원피스">
+                `;
+            }
+            // 상의와 하의가 모두 선택된 경우 (패션 카드 레이아웃)
+            else if (data.top_img && data.bottom_img) {
+                outfitArea.innerHTML = `
+                    <img src="${data.top_img}" class="outfit-card top-card" alt="선택한 상의">
+                    <img src="${data.bottom_img}" class="outfit-card bottom-card" alt="선택한 하의">
+                `;
+            }
+            // 데이터가 불완전한 경우
+            else {
+                outfitArea.innerHTML = `
+                    <span class="material-icons" style="font-size: 60px; color: #ddd;">checkroom</span>
+                    <p style="font-size: 14px; color: #999;">코디 정보가 부족합니다.</p>
+                `;
+            }
+        })
+        .catch(err => {
+            console.error("옷 이미지 로딩 실패:", err);
+            document.getElementById('outfit-display-area').innerHTML = `
+                <p style="color:#ccc;">코디 이미지를 불러올 수 없습니다.</p>
+            `;
+        });
+
+    // =============================================================
+    // [기능 2] 향수 추천 결과 API 호출 (기존 기능 유지)
+    // =============================================================
+    fetch('/api/recommendation-results/')
+        .then(res => res.json())
+        .then(data => {
+            const container = document.getElementById('perfume-results-container');
+            container.innerHTML = ''; // 로딩 메시지 제거
+
+            // 데이터가 있는 경우 (점수 고장 시 빈 배열 []로 올 것을 대비)
+            if (data && data.length > 0) {
+                data.forEach(item => {
+                    const accordText = item.accords.join(' · ');
+                    // 소수점 1자리 포맷팅
+                    const formattedScore = parseFloat(item.myscore).toFixed(1);
+
+                    const cardHtml = `
+                        <div class="perfume-card">
+                            <div class="perfume-img-slot">
+                                <!-- 향수 이미지 (샘플 경로 유지) -->
+                                <img src="/static/ui/images/sample_perfume.png" alt="${item.perfume_name}">
+                            </div>
+                            <div class="perfume-details">
+                                <h4 class="p-name">${item.perfume_name}</h4>
+                                <p class="p-brand">${item.brand}</p>
+                                <p class="p-info-tags">${item.gender} · ${item.top_season}</p>
+                                <p class="p-accords-list">${accordText}</p>
+
+                                <div class="score-display-row">
+                                    <span class="score-label">Matching Score</span>
+                                    <span class="score-value">${formattedScore}</span>
+                                    <span class="score-max">/ 300</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', cardHtml);
+                });
+            }
+            // 데이터가 없는 경우 (점수 계산 고장 등)
+            else {
+                container.innerHTML = `
+                    <p style="text-align: center; width: 100%; color: #999; padding: 50px;">
+                        현재 추천 기능을 점검 중입니다. (Score 데이터 없음)
+                    </p>
+                `;
+            }
+        })
+        .catch(err => {
+            console.error("향수 데이터 로딩 실패:", err);
+            document.getElementById('perfume-results-container').innerHTML = `
+                <p style="text-align: center; width: 100%; color: #999; padding: 50px;">
+                    추천 결과를 불러오는 중 오류가 발생했습니다.
+                </p>
+            `;
+        });
+});
+</script>
 {% endblock %}
