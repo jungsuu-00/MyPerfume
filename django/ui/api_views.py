@@ -36,11 +36,15 @@ from rest_framework import status
 from .serializers import UserInputSerializer, RecommendationResultSerializer
 from ui.models import Score, Perfume, TopBottom, Dress
 # from .recommend.calculation_v2 import myscore_cal #ver2
-from .recommend.calculation_v3 import myscore_cal #ver3 style score 수정
-
+#from .recommend.calculation_v3 import myscore_cal #ver3 style score 수정
+from .recommend.calculation_v4 import myscore_cal #ver4
 from django.db import transaction
 from rest_framework.renderers import JSONRenderer
-from .recommend.ver2_LLM import get_llm_recommendation
+
+#LLM 관련
+from .recommend.for_me_LLM import get_llm_recommendation
+from .recommend.for_someone_LLM import get_someone_recommendation
+from .recommend.gift_message_LLM import get_gift_message_recommendation
 
 # =============================================================
 # 1. 이미지 데이터 조회 API
@@ -170,8 +174,9 @@ class UserInputView(APIView):
     """
     [기능]
     1. 사용자가 선택한 [아이템 + 색상] 조합이 실제 DB(TopBottom/Dress)에 존재하는지 엄격하게 검사합니다.
-    2. 임의의 기본값(면, 노멀 등)을 생성하지 않으며, 매칭되는 데이터가 없으면 에러를 발생시킵니다.
-    3. 모든 데이터가 완벽할 때만 UserInfo를 저장하고 자동으로 myscore_cal을 호출합니다.
+    2. [추가] 선물 대상(recipient)과 상황(situation)은 DB 필드가 없으므로 세션(Session)에 임시 저장합니다.
+    3. 임의의 기본값(면, 노멀 등)을 생성하지 않으며, 매칭되는 데이터가 없으면 에러를 발생시킵니다.
+    4. 모든 데이터가 완벽할 때만 UserInfo를 저장하고 자동으로 myscore_cal을 호출합니다.
     """
 
     def post(self, request):
@@ -183,7 +188,13 @@ class UserInputView(APIView):
         data = serializer.validated_data
 
         try:
-            # 영문 입력 -> 국문 DB 값 매핑 테이블
+            # --- [추가] 선물 관련 정보 세션 저장 (DB 저장 X) ---
+            # 프론트에서 넘어온 한글 텍스트("연인", "생일" 등)를 세션에 저장하여 LLM에서 사용
+            request.session['recipient'] = data.get('recipient')
+            request.session['situation'] = data.get('situation')
+            request.session.modified = True  # 세션 변경사항 강제 적용
+
+            # 영문 입력 -> 국문 DB 값 매핑 테이블 (기존 기능 유지)
             map_item = {
                 'blouse': '블라우스', 'tshirt': '티셔츠', 'knit': '니트웨어', 'shirt': '셔츠', 'sleeveless': '탑',
                 'hoodie': '후드티', 'sweatshirt': '맨투맨', 'bratop': '브라탑',
@@ -208,12 +219,12 @@ class UserInputView(APIView):
             user_dress_obj = None
 
             with transaction.atomic():
-                # --- [A] 투피스(상의+하의) 검사 ---
+                # --- [A] 투피스(상의+하의) 검사 (기존 로직 유지) ---
                 if data.get('top') and data.get('bottom'):
                     top_color_kr = map_color.get(data.get('top_color'))
                     bottom_color_kr = map_color.get(data.get('bottom_color'))
 
-                    # 색상 객체 조회 (기본 데이터이므로 get 사용)
+                    # 색상 객체 조회
                     top_color_obj = ClothesColor.objects.get(color=top_color_kr)
                     bottom_color_obj = ClothesColor.objects.get(color=bottom_color_kr)
 
@@ -231,35 +242,31 @@ class UserInputView(APIView):
                         bottom_color=bottom_color_obj
                     ).first()
 
-                    # 데이터가 없으면 에러 발생 (임의 생성 안 함)
+                    # 데이터가 없으면 에러 발생
                     if not user_top_obj or not user_bottom_obj:
                         missing = []
                         if not user_top_obj: missing.append(f"상의({top_cat_kr}-{top_color_kr})")
                         if not user_bottom_obj: missing.append(f"하의({bottom_cat_kr}-{bottom_color_kr})")
                         raise ValueError(f"❌ [데이터 없음] 선택하신 {', '.join(missing)} 데이터가 의류 DB에 존재하지 않습니다.")
 
-                # --- [B] 원피스 검사 ---
+                # --- [B] 원피스 검사 (기존 로직 유지) ---
                 elif data.get('onepiece'):
-                    # 1. 프론트에서 보낸 색상 이름을 한글로 변환 (예: 'pink' -> '핑크')
                     onepiece_color_kr = map_color.get(data.get('onepiece_color'))
 
-                    # 2. ClothesColor 테이블에서 색상 객체 조회
                     try:
                         dress_color_obj = ClothesColor.objects.get(color=onepiece_color_kr)
                     except ClothesColor.DoesNotExist:
                         raise ValueError(f"❌ DB에 '{onepiece_color_kr}' 색상 정보가 없습니다.")
 
-                    # 3. [핵심 수정] 서브스타일 명칭('원피스')을 따지지 않고, 해당 색상의 원피스 데이터를 조회
+                    # 해당 색상의 원피스 데이터 조회
                     user_dress_obj = Dress.objects.filter(
                         dress_color=dress_color_obj
                     ).first()
 
-                    # 4. 만약 해당 색상의 원피스가 DB에 아예 없다면 에러 발생
                     if not user_dress_obj:
-                        raise ValueError(
-                            f"❌ [데이터 없음] 현재 DB에 '{onepiece_color_kr}' 색상의 원피스 데이터가 존재하지 않습니다.")
+                        raise ValueError(f"❌ [데이터 없음] 현재 DB에 '{onepiece_color_kr}' 색상의 원피스 데이터가 존재하지 않습니다.")
 
-                # --- [C] UserInfo 생성 ---
+                # --- [C] UserInfo 생성 (기존 필드 유지, recipient/situation은 넣지 않음) ---
                 new_user_info = UserInfo.objects.create(
                     season=final_season,
                     disliked_accord=dislikes_str,
@@ -276,7 +283,7 @@ class UserInputView(APIView):
                     dress_color=map_color.get(data.get('onepiece_color'))
                 )
 
-                # --- [D] 자동 추천 계산 실행 ---
+                # --- [D] 자동 추천 계산 및 Score 저장 (기존 로직 유지) ---
                 print(f"🔄 [Strict 자동 추천] 사용자 ID: {new_user_info.user_id}")
                 top3_scores = myscore_cal(new_user_info.user_id)
 
@@ -294,7 +301,7 @@ class UserInputView(APIView):
         except ClothesColor.DoesNotExist:
             return Response({"error": "DB에 해당 색상 정보가 없습니다."}, status=400)
         except ValueError as ve:
-            return Response({"error": str(ve)}, status=400)  # 데이터 없음 에러 처리
+            return Response({"error": str(ve)}, status=400)
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -773,3 +780,53 @@ class MyNotePerfumeCompleteAPIView(APIView):
         request.session.pop("my_note_style", None)
 
         return Response({"message": "MyNote 저장 완료"}, status=200)
+
+class SomeoneSummaryAPIView(APIView):
+    """
+    For Someone 전용 요약 API
+    """
+    renderer_classes = [JSONRenderer]
+
+    def get(self, request):
+        last_user = UserInfo.objects.last()
+        if not last_user:
+            return Response({"summary": "데이터가 없습니다."}, status=404)
+
+        # 세션에서 선물 정보 꺼내기
+        recipient = request.session.get('recipient') or "소중한 분"
+        situation = request.session.get('situation') or "특별한 날"
+
+        try:
+            # For Someone 전용 로직 호출
+            summary_text = get_someone_recommendation(
+                last_user.user_id,
+                recipient,
+                situation
+            )
+            return Response({"summary": summary_text}, status=200)
+        except Exception as e:
+            return Response({"summary": "분석 중 오류가 발생했습니다."}, status=500)
+
+class GiftMessageAPIView(APIView):
+    """
+    기프트 카드 문구 생성 API
+    """
+    renderer_classes = [JSONRenderer]
+
+    def get(self, request):
+        last_user = UserInfo.objects.last()
+        if not last_user: return Response({"message": "데이터 없음"}, status=404)
+
+        # 세션에서 정보 가져오기
+        recipient = request.session.get('recipient') or "소중한 분"
+        situation = request.session.get('situation') or "특별한 날"
+        # 쿼리 파라미터로 '짧은' 또는 '긴'을 받음
+        message_type = request.query_params.get('type', '짧은')
+
+        try:
+            raw_text = get_gift_message_recommendation(last_user.user_id, recipient, situation, message_type)
+            # '||' 구분자로 잘라서 배열로 보냄
+            messages = [m.strip() for m in raw_text.split('||')]
+            return Response({"messages": messages}, status=200)
+        except:
+            return Response({"messages": ["마음을 담아 선물하세요."]}, status=500)

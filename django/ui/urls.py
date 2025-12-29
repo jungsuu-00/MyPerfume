@@ -4,7 +4,7 @@ from .api_views import ScoreView
 
 from . import views         # 화면용
 from . import api_views     # API용
-from .api_views import FilterImagesAPI, UserInputView, RecommendationResultAPIView, RecommendationSummaryAPIView, MyNoteStyleAPIView, MyNotePerfumeCartAPIView, MyNotePerfumeSearchAPIView, MyNotePerfumeCompleteAPIView
+from .api_views import FilterImagesAPI, UserInputView, RecommendationResultAPIView, RecommendationSummaryAPIView, MyNoteStyleAPIView, MyNotePerfumeCartAPIView, MyNotePerfumeSearchAPIView, MyNotePerfumeCompleteAPIView, SomeoneSummaryAPIView, GiftMessageAPIView
 
 # ==========================================
 # 1. DRF 라우터 설정 (api_views 사용)
@@ -44,6 +44,8 @@ urlpatterns = [
     path('api/my-note/perfume/cart/', api_views.MyNotePerfumeCartAPIView.as_view()),
     path('api/my-note/perfume/search/', api_views.MyNotePerfumeSearchAPIView.as_view()),
     path("api/my-note/perfume/complete/", MyNotePerfumeCompleteAPIView.as_view()),
+    path('api/someone-summary/', SomeoneSummaryAPIView.as_view(), name='someone-summary'),
+    path('api/gift-message/', GiftMessageAPIView.as_view(), name='gift-message'),
 
 
 
