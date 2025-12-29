@@ -2,81 +2,118 @@
 {% load static %}
 {% block content %}
 
-<div class="form-container">
+<div class="form-container mynote-page">
 
-  <!-- ========================= -->
-  <!-- 헤더 -->
-  <!-- ========================= -->
-  <div class="header">
-    <h1>MyNote</h1>
-    <p>향수를 검색하고 점수를 기록해보세요</p>
-  </div>
-
-  <!-- ========================= -->
-  <!-- 4-1 선택 요약 (읽기 전용) -->
-  <!-- ========================= -->
-  <div class="section content-align">
-    <span class="box-label">선택한 스타일</span>
-
-    <div class="summary-box">
-      <p>👗 선택한 옷과 계절을 기준으로 향수를 기록합니다.</p>
-      <p style="color:#888; font-size:13px;">
-        (이 정보는 4-1에서 선택한 내용입니다)
-      </p>
+  <!-- 상단 타이틀 (피그마처럼 중앙 정렬) -->
+  <div class="mynote-header">
+    <div class="mynote-header-center">
+      <div class="mynote-title">MyNote, 지금 내 스타일에 어울리는 향수를 기록해보세요</div>
     </div>
   </div>
 
-  <!-- ========================= -->
-  <!-- 향수 검색 -->
-  <!-- ========================= -->
-  <div class="section content-align">
-    <span class="box-label">향수 검색</span>
-
-    <div class="search-row">
+  <!-- 검색바 + 검색 버튼(오른쪽 붙이기) -->
+  <div class="mynote-search-box">
+    <div class="mynote-search-field">
+      <span class="mynote-search-icon material-icons">search</span>
       <input
         type="text"
         id="perfume-search-input"
-        placeholder="향수 이름이나 브랜드를 검색하세요"
-        class="text-input"
-      >
-      <button class="selection-btn" onclick="searchPerfume()">검색</button>
+        placeholder="향수 검색"
+        onkeydown="handleSearchKey(event)"
+      />
     </div>
 
-    <!-- 검색 결과 -->
-    <div id="search-result" class="card-grid">
-      <!-- JS로 동적 렌더 -->
+    <button type="button" class="mynote-search-btn" onclick="searchPerfume()">검색</button>
+  </div>
+
+  <!-- (빨강 영역) 검색 결과 리스트 -->
+  <div id="search-result-list" class="mynote-result-list">
+    <!-- 검색 전: 비어있음 -->
+  </div>
+
+  <!-- (파랑 영역) MyNote 요약 박스 -->
+  <div class="mynote-cart">
+    <div class="mynote-cart-title">MyNote</div>
+
+    <div id="mynote-list" class="mynote-cart-list">
+      <p class="mynote-empty">아직 저장된 향수가 없습니다.</p>
     </div>
   </div>
 
-  <!-- ========================= -->
-  <!-- MyNote 장바구니 -->
-  <!-- ========================= -->
-  <div class="section content-align">
-    <span class="box-label">MyNote</span>
-
-    <div id="cart-list" class="cart-list">
-      <p style="color:#aaa;">아직 저장된 향수가 없습니다.</p>
-    </div>
-  </div>
-
-  <!-- ========================= -->
-  <!-- 완료 -->
-  <!-- ========================= -->
-  <div class="submit-container">
-    <button class="submit-btn" onclick="completeMyNote()">완료</button>
+  <!-- 완료 버튼 (피그마처럼 우측 하단) -->
+  <div class="mynote-footer">
+    <button class="mynote-complete-btn" onclick="completeMyNote()">완료</button>
   </div>
 
 </div>
 
-<!-- ========================= -->
-<!-- JS (UI 전용 / API 연결 전) -->
-<!-- ========================= -->
+<!-- =========================
+     Template: 검색 결과 1줄 카드
+     [이미지] [이름+브랜드] [점수입력/100] [저장]
+========================== -->
+<template id="result-item-template">
+  <div class="mynote-result-item">
+    <div class="mynote-thumb">
+      <img class="mynote-thumb-img" alt="perfume"/>
+    </div>
+
+    <div class="mynote-text">
+      <div class="mynote-name"></div>
+      <div class="mynote-brand"></div>
+    </div>
+
+    <div class="mynote-scorebox">
+      <div class="mynote-score-label">내 스타일과 향수와의 점수</div>
+      <div class="mynote-score-row">
+        <input class="mynote-score-input" type="number" min="0" max="100" placeholder="" />
+        <span class="mynote-score-max">/100</span>
+      </div>
+    </div>
+
+    <button class="mynote-pill-btn mynote-save-btn" type="button">저장</button>
+  </div>
+</template>
+
+<!-- =========================
+     Template: MyNote 저장 항목 1줄
+     1. [이미지] [이름+브랜드] [점수/100] [삭제]
+========================== -->
+<template id="cart-item-template">
+  <div class="mynote-cart-item">
+    <div class="mynote-cart-index"></div>
+
+    <div class="mynote-thumb">
+      <img class="mynote-thumb-img" alt="perfume"/>
+    </div>
+
+    <div class="mynote-text">
+      <div class="mynote-name"></div>
+      <div class="mynote-brand"></div>
+    </div>
+
+    <div class="mynote-scorebox">
+      <div class="mynote-score-label">내 스타일과 향수와의 점수</div>
+      <div class="mynote-score-value"></div>
+    </div>
+
+    <button class="mynote-pill-btn mynote-delete-btn" type="button">삭제</button>
+  </div>
+</template>
+
 <script>
 const csrfToken = '{{ csrf_token }}';
 
+/* 엔터로 검색 */
+function handleSearchKey(event) {
+  if (event.key === "Enter") searchPerfume();
+}
+
+/* =========================
+   향수 검색
+========================= */
 function searchPerfume() {
   const keyword = document.getElementById("perfume-search-input").value.trim();
-  const resultBox = document.getElementById("search-result");
+  const resultBox = document.getElementById("search-result-list");
 
   if (!keyword) {
     alert("검색어를 입력해주세요.");
@@ -88,52 +125,39 @@ function searchPerfume() {
     .then(data => {
       resultBox.innerHTML = "";
 
-      if (data.length === 0) {
-        resultBox.innerHTML = "<p style='color:#aaa;'>검색 결과가 없습니다.</p>";
+      if (!data || data.length === 0) {
+        resultBox.innerHTML = `<p class="mynote-empty">검색 결과가 없습니다.</p>`;
         return;
       }
 
       data.forEach(p => {
-        resultBox.innerHTML += `
-          <div class="card">
-            <img src="${p.perfume_img_url}" class="card-img">
-            <div class="card-info">
-              <strong>${p.name}</strong>
-              <p>${p.brand}</p>
+        const node = document.getElementById("result-item-template").content.cloneNode(true);
 
-              <input
-                type="number"
-                min="0"
-                max="100"
-                placeholder="점수"
-                class="score-input"
-                id="score-${p.perfume_id}"
-              >
+        const img = node.querySelector(".mynote-thumb-img");
+        img.src = p.perfume_img_url;
 
-              <button class="selection-btn"
-                onclick="addToCart(
-                ${p.perfume_id},
-                '${p.name}',
-                '${p.brand}',
-                '${p.perfume_img_url}'
-                )">
-                저장
-              </button>
-            </div>
-          </div>
-        `;
+        node.querySelector(".mynote-name").innerText = p.name;
+        node.querySelector(".mynote-brand").innerText = p.brand ?? "";
+
+        const scoreInput = node.querySelector(".mynote-score-input");
+        scoreInput.id = `score-${p.perfume_id}`;
+
+        node.querySelector(".mynote-save-btn").onclick = () => {
+          addToCart(p.perfume_id, p.name, p.brand, p.perfume_img_url);
+        };
+
+        resultBox.appendChild(node);
       });
     })
-    .catch(() => {
-      alert("향수 검색 실패");
-    });
+    .catch(() => alert("향수 검색 실패"));
 }
 
-
-/* 장바구니 추가 */
+/* =========================
+   장바구니 추가
+========================= */
 function addToCart(id, name, brand, img) {
   const scoreInput = document.getElementById(`score-${id}`);
-  const score = scoreInput.value;
+  const score = scoreInput?.value;
 
   if (!score) {
     alert("점수를 입력해주세요.");
@@ -153,46 +177,47 @@ function addToCart(id, name, brand, img) {
       perfume_img_url: img,
       smelling_rate: score
     })
-
-
   })
   .then(res => res.json())
-  .then(data => {
-    renderCart(data.data);   // 이게 핵심
-  })
-  .catch(() => {
-    alert("장바구니 저장 실패");
-  });
+  .then(data => renderCart(data.data))
+  .catch(() => alert("장바구니 저장 실패"));
 }
 
-
-/* 장바구니 렌더 */
+/* =========================
+   장바구니 렌더
+========================= */
 function renderCart(cart) {
-  const cartBox = document.getElementById('cart-list');
+  const cartBox = document.getElementById('mynote-list');
 
   if (!cart || cart.length === 0) {
-    cartBox.innerHTML = `<p style="color:#aaa;">아직 저장된 향수가 없습니다.</p>`;
+    cartBox.innerHTML = `<p class="mynote-empty">아직 저장된 향수가 없습니다.</p>`;
     return;
   }
 
   cartBox.innerHTML = "";
 
-  cart.forEach(p => {
-    cartBox.innerHTML += `
-      <div class="cart-item">
-        <img src="${p.perfume_img_url}" class="cart-img">
-        <div class="cart-info">
-            <strong>${p.perfume_name}</strong>
-            <p>${p.brand}</p>
-          <span>점수: ${p.smelling_rate}</span>
-        </div>
-        <button class="delete-btn" onclick="removeFromCart(${p.perfume_id})">삭제</button>
-      </div>
-    `;
+  cart.forEach((p, idx) => {
+    const node = document.getElementById("cart-item-template").content.cloneNode(true);
+
+    node.querySelector(".mynote-cart-index").innerText = `${idx + 1}.`;
+
+    const img = node.querySelector(".mynote-thumb-img");
+    img.src = p.perfume_img_url;
+
+    node.querySelector(".mynote-name").innerText = p.perfume_name;
+    node.querySelector(".mynote-brand").innerText = p.brand ?? "";
+
+    node.querySelector(".mynote-score-value").innerText = `${p.smelling_rate} / 100`;
+
+    node.querySelector(".mynote-delete-btn").onclick = () => removeFromCart(p.perfume_id);
+
+    cartBox.appendChild(node);
   });
 }
 
-/* 장바구니 삭제 */
+/* =========================
+   장바구니 삭제
+========================= */
 function removeFromCart(perfumeId) {
   fetch('/api/my-note/perfume/cart/', {
     method: 'DELETE',
@@ -200,18 +225,15 @@ function removeFromCart(perfumeId) {
       'Content-Type': 'application/json',
       'X-CSRFToken': csrfToken
     },
-    body: JSON.stringify({
-      perfume_id: perfumeId
-    })
+    body: JSON.stringify({ perfume_id: perfumeId })
   })
   .then(res => res.json())
-  .then(data => {
-    renderCart(data.data);
-  });
+  .then(data => renderCart(data.data));
 }
 
-
-/* 완료 (DB 저장 → 결과 페이지 이동) */
+/* =========================
+   완료 (DB 저장 → 결과 페이지 이동)
+========================= */
 function completeMyNote() {
   fetch("/api/my-note/perfume/complete/", {
     method: "POST",
@@ -224,14 +246,9 @@ function completeMyNote() {
     if (!res.ok) throw new Error();
     return res.json();
   })
-  .then(() => {
-    window.location.href = "/my-note/result/";
-  })
-  .catch(() => {
-    alert("최소 한 개의 향수를 저장해주세요.");
-  });
+  .then(() => window.location.href = "/my-note/result/")
+  .catch(() => alert("최소 한 개의 향수를 저장해주세요."));
 }
-
-
 </script>
+
 {% endblock %}

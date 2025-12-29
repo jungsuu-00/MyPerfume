@@ -170,6 +170,7 @@
     </div>
 </div>
 
+
 <script>
     // 전역 선택 상태 객체
     const selections = {
@@ -177,6 +178,10 @@
         bottom: {item: null, color: null},
         onepiece: {item: null, color: null}
     };
+
+    function getSelectedBox(selector) {
+        return document.querySelector(`${selector} .preview-box.selected`);
+    }
 
     // 1. 슬라이더 이동 로직
     function moveSlider(trackId, direction) {
@@ -277,7 +282,7 @@
         }
 
         // 이미지 필터링 API 호출
-        fetch(`/api/filter-images/?category=${category}&item=${item}&color=${color}`)
+        fetch(`/api/my-note/filter-images/?category=${category}&item=${item}&color=${color}`)
             .then(res => res.json())
             .then(data => {
                 boxes.forEach((box, i) => {
@@ -285,7 +290,10 @@
                     box.classList.remove('selected');
                     if (data.images && data.images[i]) {
                         const img = document.createElement('img');
-                        img.src = data.images[i];
+                        img.src = data.images[i].img;
+                        img.dataset.id = data.images[i].id;
+                        img.dataset.color = data.images[i].color;
+                        img.dataset.category = data.images[i].category;
                         box.appendChild(img);
                         // 이미지도 클릭하면 'selected' 상태 토글
                         box.onclick = function() {
@@ -320,58 +328,91 @@
     // 9. 최종 제출 로직
 function submitSelection() {
 
-    /* 1. 계절 선택 검증 */
     const seasonBtn = document.querySelector('#season-group .active');
     if (!seasonBtn) {
         alert("계절을 선택해주세요!");
         return;
     }
 
-    /* 2. 코디 타입 판별 (진짜 선택 기준) */
     const hasOnepiece =
-        selections.onepiece.item !== null &&
-        selections.onepiece.color !== null;
+        selections.onepiece.item &&
+        selections.onepiece.color;
 
     const hasTopBottom =
-        selections.top.item !== null &&
-        selections.top.color !== null &&
-        selections.bottom.item !== null &&
-        selections.bottom.color !== null;
+        selections.top.item &&
+        selections.top.color &&
+        selections.bottom.item &&
+        selections.bottom.color;
 
-    let styleType = null;
+    let payload = {
+        style_type: null,
+        season: seasonBtn.dataset.value,
+        top: null,
+        bottom: null,
+        dress: null
+    };
 
+    //  원피스
     if (hasOnepiece) {
-        styleType = "onepiece";
+        const selectedImg = document.querySelector('#preview-onepiece .preview-box.selected img');
+        if (!selectedImg) {
+            alert("원피스를 선택해주세요.");
+            return;
+        }
+
+        payload.style_type = "dress";
+        payload.dress = {
+            img: selectedImg.src,
+            color: selectedImg.dataset.color,
+            id: selectedImg.dataset.id ? parseInt(selectedImg.dataset.id, 10) : null
+        };
+
+    //  상의 + 하의
     } else if (hasTopBottom) {
-        styleType = "topbottom";
+
+        const topImg = document.querySelector('#preview-top .preview-box.selected img');
+        const bottomImg = document.querySelector('#preview-bottom .preview-box.selected img');
+
+        if (!topImg || !bottomImg) {
+            alert("상의와 하의를 모두 선택해주세요.");
+            return;
+        }
+
+        payload.style_type = "topbottom";
+        payload.top = { 
+            img: topImg.src,
+            category: topImg.dataset.category,
+            color: topImg.dataset.color,
+            id: topImg.dataset.id ? parseInt(topImg.dataset.id, 10) : null
+        };
+        payload.bottom = { 
+            img: bottomImg.src,
+            category: bottomImg.dataset.category,
+            color: bottomImg.dataset.color,
+            id: bottomImg.dataset.id ? parseInt(bottomImg.dataset.id, 10) : null
+         };
+
     } else {
         alert("코디를 선택해주세요!");
         return;
     }
 
-    /* 3. 최소 payload */
-    const requestData = {
-        style_type: styleType,
-        season: seasonBtn.dataset.value
-    };
+    console.log("SUBMIT payload:", payload);
 
-    /* 4. 세션 저장 */
     fetch('/api/my-note/style/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': document.getElementById('csrf_token').value
         },
-        body: JSON.stringify(requestData)
+        body: JSON.stringify(payload)
     })
     .then(res => {
         if (!res.ok) throw new Error();
-        return res.json();
-    })
-    .then(() => {
         window.location.href = "/my-note/perfume/";
     })
-    .catch(() => {
+    .catch(err => {
+        console.error(err);
         alert("스타일 저장 중 오류가 발생했습니다.");
     });
 }

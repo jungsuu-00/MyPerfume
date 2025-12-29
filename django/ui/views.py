@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from .models import UserSmellingInput
+
 
 # ==========================================
 # 화면 렌더링 Views (HTML 페이지 연결)
@@ -25,9 +27,70 @@ def my_note_style(request):
 
     return render(request, "ui/my_note_style.html")
 
+
 def my_note_perfume(request):
-    return render(request, 'ui/my_note_perfume.html')
+    return render(request, "ui/my_note_perfume.html")
 
 def my_note_result(request):
-    return render(request, 'ui/my_note_result.html')
+    # =========================
+    # 1. 가장 최근 smelling_user_id
+    # =========================
+    last_row = (
+        UserSmellingInput.objects
+        .order_by("-smelling_user_id")
+        .first()
+    )
 
+    if not last_row:
+        # 아직 저장된 MyNote가 없는 경우
+        return render(request, "ui/my_note_result.html", {
+            "onepiece_img": None,
+            "top_img": None,
+            "bottom_img": None,
+            "mynote_list": [],
+        })
+
+    smelling_user_id = last_row.smelling_user_id
+
+    # =========================
+    # 2. 같은 MyNote 묶음 전체
+    # =========================
+    rows = UserSmellingInput.objects.filter(
+        smelling_user_id=smelling_user_id
+    )
+
+    # =========================
+    # 3. 스타일 이미지
+    # =========================
+    onepiece_img = None
+    top_img = None
+    bottom_img = None
+
+    style_row = rows.first()
+
+    if style_row.dress_img:
+        onepiece_img = style_row.dress_img
+    else:
+        top_img = style_row.top_img
+        bottom_img = style_row.bottom_img
+
+    # =========================
+    # 4. 향수 리스트
+    # =========================
+    mynote_list = []
+    for r in rows:
+        mynote_list.append({
+            "image_url": r.perfume_img_url,
+            "name": r.perfume_id.perfume_name if r.perfume_id else "",
+            "brand": r.brand,
+            "score": r.smelling_rate,
+        })
+
+    context = {
+        "onepiece_img": onepiece_img,
+        "top_img": top_img,
+        "bottom_img": bottom_img,
+        "mynote_list": mynote_list,
+    }
+
+    return render(request, "ui/my_note_result.html", context)

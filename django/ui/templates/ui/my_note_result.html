@@ -1,0 +1,57 @@
+{% extends 'ui/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="result-page">
+
+    <!-- 헤더 -->
+    <div class="result-header">
+        <h1 class="page-title">My Perfume</h1>
+        <p class="page-subtitle">당신의 향을 찾아보세요</p>
+        <h2 class="page-desc">MyNote, 지금 내 스타일에 어울리는 향수 결과입니다</h2>
+    </div>
+
+    <!-- 1. 내 스타일 -->
+    <section class="result-section">
+        <h3 class="section-title">1. 내 스타일</h3>
+
+        <div class="style-image-box">
+            {% if onepiece_img %}
+                <img src="{{ onepiece_img }}" class="style-img">
+            {% else %}
+                <img src="{{ top_img }}" class="style-img half">
+                <img src="{{ bottom_img }}" class="style-img half">
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- 2. 내 향수 -->
+    <section class="result-section">
+        <h3 class="section-title">2. 내 향수</h3>
+
+        <div class="mynote-result-box">
+
+            {% for p in mynote_list %}
+            <div class="mynote-result-row">
+                <!-- 이미지 -->
+                <img src="{{ p.image_url }}" class="perfume-thumb">
+
+                <!-- 정보 -->
+                <div class="perfume-info">
+                    <div class="perfume-name">{{ p.name }}</div>
+                    <div class="perfume-brand">{{ p.brand }}</div>
+                </div>
+
+                <!-- 점수 -->
+                <div class="perfume-score">
+                    내 스타일과 향수의 점수<br>
+                    <strong>{{ p.score }} / 100</strong>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+    </section>
+
+</div>
+{% endblock %}

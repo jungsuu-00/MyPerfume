@@ -6,6 +6,10 @@ from django.db import transaction
 from django.conf import settings
 from django.templatetags.static import static
 from django.utils.safestring import mark_safe
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
+
+
 
 # DRF(Django REST Framework) 관련 임포트
 from rest_framework.views import APIView
@@ -14,10 +18,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.renderers import BrowsableAPIRenderer, JSONRenderer
 
+
 # 모델 및 시리얼라이저 임포트
 from .models import (
     TopBottom, Dress, ClothesColor, PerfumeColor,
-    Perfume, PerfumeSeason, PerfumeClassification, UserInfo, Score
+    Perfume, PerfumeSeason, PerfumeClassification, UserInfo, Score, UserSmellingInput
 )
 from .serializers import (
     TopBottomSerializer,
@@ -261,7 +266,7 @@ class UserInputView(APIView):
                     try:
                         dress_color_obj = ClothesColor.objects.get(color=onepiece_color_kr)
                     except ClothesColor.DoesNotExist:
-                        raise ValueError(f"❌ DB에 '{onepiece_color_kr}' 색상 정보가 없습니다.")
+                        raise ValueError(f" DB에 '{onepiece_color_kr}' 색상 정보가 없습니다.")
 
                     # 해당 색상의 원피스 데이터 조회
                     user_dress_obj = Dress.objects.filter(
@@ -269,7 +274,7 @@ class UserInputView(APIView):
                     ).first()
 
                     if not user_dress_obj:
-                        raise ValueError(f"❌ [데이터 없음] 현재 DB에 '{onepiece_color_kr}' 색상의 원피스 데이터가 존재하지 않습니다.")
+                        raise ValueError(f" [데이터 없음] 현재 DB에 '{onepiece_color_kr}' 색상의 원피스 데이터가 존재하지 않습니다.")
 
                 # --- [C] UserInfo 생성 (기존 필드 유지, recipient/situation은 넣지 않음) ---
                 new_user_info = UserInfo.objects.create(
@@ -350,7 +355,7 @@ class ScoreView(APIView):
 
             # 1️⃣ 점수 계산 (Top3 Score 객체 반환)
             score_objects = myscore_cal(user_id)
-            print("🔥 생성된 Score 객체 수:", len(score_objects))
+            print(" 생성된 Score 객체 수:", len(score_objects))
 
             if not score_objects:
                 return Response(
@@ -359,26 +364,17 @@ class ScoreView(APIView):
                 )
 
             print(
-                "🏆 저장될 Top3 myscore:",
+                " 저장될 Top3 myscore:",
                 [s.myscore for s in score_objects]
             )
 
-            # 2️⃣ DB 저장
-            # with transaction.atomic():
-            #     deleted_count, _ = Score.objects.filter(
-            #         user__id=user_id
-            #     ).delete()
-            #     print("🧹 삭제된 기존 score 수:", deleted_count)
-            #
-            #     Score.objects.bulk_create(score_objects)
-            #     print("✅ bulk_create 완료 (Top3만 저장)")
             with transaction.atomic():
                 deleted_count, _ = Score.objects.filter(user_id=user_id).delete()
-                print("🧹 삭제된 기존 score 수:", deleted_count)
+                print(" 삭제된 기존 score 수:", deleted_count)
 
                 for s in score_objects:
                     s.save()
-                    print("💾 저장됨:", s.user_id, s.perfume_id, s.myscore)
+                    print(" 저장됨:", s.user_id, s.perfume_id, s.myscore)
 
 
             return Response(
@@ -568,6 +564,10 @@ class RecommendationSummaryAPIView(APIView):
             traceback.print_exc()
             return Response({"summary": "분석 중 오류가 발생했습니다."}, status=500)
         
+
+
+
+
 class MyNoteStyleAPIView(APIView):
     """
     MyNote 4-1
@@ -673,10 +673,6 @@ class MyNotePerfumeCartAPIView(APIView):
         return Response({"data": cart}, status=status.HTTP_200_OK)
     
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from django.db.models import Q
-from .models import Perfume
 
 
 
@@ -753,7 +749,7 @@ class MyNotePerfumeCompleteAPIView(APIView):
             )
 
             # 원피스
-            if style["style_type"] == "onepiece":
+            if style["style_type"] == "dress":
                 dress = style.get("dress")
                 if dress:
                     obj.dress_id_id = dress.get("id")
@@ -785,6 +781,83 @@ class MyNotePerfumeCompleteAPIView(APIView):
         request.session.pop("my_note_style", None)
 
         return Response({"message": "MyNote 저장 완료"}, status=200)
+
+
+class MyNoteFilterImagesAPIView(APIView):
+    renderer_classes = [JSONRenderer]
+
+    def get(self, request):
+        category_en = request.query_params.get('category')
+        item_en = request.query_params.get('item')
+        color_en = request.query_params.get('color')
+
+        if not (category_en and item_en and color_en):
+            return Response({'images': []})
+
+        map_category = {'top': '상의', 'bottom': '하의', 'onepiece': '원피스'}
+        map_item = {
+            'blouse': '블라우스', 'tshirt': '티셔츠', 'knit': '니트웨어', 'shirt': '셔츠', 'hoodie': '후드티',
+            'pants': '팬츠', 'jeans': '청바지', 'skirt': '스커트', 'leggings': '레깅스',
+            'dress': '드레스', 'jumpsuit': '점프수트'
+        }
+        map_color = {
+            'white': '화이트', 'black': '블랙', 'grey': '그레이', 'navy': '네이비', 'beige': '베이지',
+            'pink': '핑크', 'skyblue': '스카이블루', 'brown': '브라운', 'red': '레드',
+            'green': '그린', 'gold': '골드', 'silver': '실버'
+        }
+
+        cat_kr = map_category.get(category_en)
+        item_kr = map_item.get(item_en)
+        color_kr = map_color.get(color_en)
+
+        if not (cat_kr and item_kr and color_kr):
+            return Response({'images': []})
+
+        base_dir = os.path.join(
+            settings.BASE_DIR,
+            'ui', 'static', 'ui', 'clothes',
+            cat_kr, item_kr, color_kr
+        )
+
+        images = []
+
+        if os.path.exists(base_dir):
+            for file in os.listdir(base_dir):
+                if not file.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+                    continue
+
+                name = os.path.splitext(file)[0]
+                parts = name.split("_")
+
+                # 파일명: 스타일_식별자_상의
+                if len(parts) < 3:
+                    continue
+
+                try:
+                    cloth_id = int(parts[1])
+                except ValueError:
+                    continue
+
+                encoded_cat = quote(cat_kr)
+                encoded_item = quote(item_kr)
+                encoded_color = quote(color_kr)
+                encoded_file = quote(file)
+
+                url_path = f'/static/ui/clothes/{encoded_cat}/{encoded_item}/{encoded_color}/{encoded_file}'
+
+                images.append({
+                    "id": cloth_id,
+                    "img": url_path,
+                    "category": category_en,
+                    "item": item_en,
+                    "color": color_en,
+                })
+
+        images = random.sample(images, min(len(images), 4))
+        while len(images) < 4:
+            images.append(None)
+
+        return Response({'images': images})
 
 class SomeoneSummaryAPIView(APIView):
     """
