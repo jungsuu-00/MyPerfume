@@ -80,12 +80,23 @@ def calc_color_score(c_vec, f_vec):
 # =====================================================
 def find_best_weights():
     k = 3
+    # ✅ float 변환 추가
     final_result = pd.DataFrame.from_records(
         UserSmellingMyScore.objects.all().values()
     )
+    # Decimal 컬럼들을 float로 변환
+    numeric_cols = ['style_score', 'color_score', 'season_score']
+    for col in numeric_cols:
+        if col in final_result.columns:
+            final_result[col] = final_result[col].astype(float)
+    
     user_smelling_df = pd.DataFrame.from_records(
         UserSmellingInput.objects.all().values()
     )
+    
+    # ✅ 디버깅: 실제 컬럼명 확인
+    print("UserSmellingInput 컬럼:", user_smelling_df.columns.tolist())
+    print("UserSmellingMyScore 컬럼:", final_result.columns.tolist())
 
     weight_candidates = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
 
@@ -125,9 +136,15 @@ def find_best_weights():
 
         for uid in topk_df["user_id"].unique():
             recs = topk_df[topk_df["user_id"] == uid]["perfume_id"].tolist()
+            
+            # ✅ 실제 컬럼명으로 수정 (perfume_id 또는 perfume_id_id 등)
+            # 만약 컬럼명이 'perfume_id_id'라면 아래처럼 수정
+            perfume_col = 'perfume_id' if 'perfume_id' in user_smelling_df.columns else 'perfume_id_id'
+            user_col = 'smelling_user_id' if 'smelling_user_id' in user_smelling_df.columns else 'user_id'
+            
             actuals = user_smelling_df[
-                user_smelling_df["smelling_user_id"] == uid
-            ]["perfume_id"].tolist()
+                user_smelling_df[user_col] == uid
+            ][perfume_col].tolist()
 
             if len(actuals) == 0:
                 continue
