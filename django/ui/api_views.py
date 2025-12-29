@@ -555,3 +555,221 @@ class RecommendationSummaryAPIView(APIView):
             import traceback
             traceback.print_exc()
             return Response({"summary": "분석 중 오류가 발생했습니다."}, status=500)
+        
+class MyNoteStyleAPIView(APIView):
+    """
+    MyNote 4-1
+    - 코디 + 계절 선택
+    - 옷 정보까지 session에 저장
+    """
+
+    def post(self, request):
+        style_type = request.data.get("style_type")
+        season = request.data.get("season")
+
+        if not style_type or not season:
+            return Response(
+                {"error": "style_type과 season은 필수입니다."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 옷 정보도 같이 저장
+        request.session["my_note_style"] = {
+            "style_type": style_type,
+            "season": season,
+
+            # 투피스
+            "top": request.data.get("top"),
+            "bottom": request.data.get("bottom"),
+
+            # 원피스
+            "dress": request.data.get("dress"),
+        }
+
+        request.session.modified = True
+
+        return Response(
+            {"message": "스타일 저장 완료"},
+            status=status.HTTP_200_OK
+        )
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+
+class MyNotePerfumeCartAPIView(APIView):
+    """
+    MyNote 4-2 향수 장바구니 (session)
+    - GET    : 장바구니 목록
+    - POST   : 추가 or 점수 수정
+    - DELETE : 삭제
+    """
+
+    SESSION_KEY = "my_note_cart"
+
+    def get(self, request):
+        cart = request.session.get(self.SESSION_KEY, [])
+        return Response({"data": cart}, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        perfume_id = request.data.get("perfume_id")
+        brand = request.data.get("brand")
+        perfume_img_url = request.data.get("perfume_img_url")
+        smelling_rate = request.data.get("smelling_rate")
+
+        if not perfume_id or smelling_rate is None:
+            return Response(
+                {"error": "perfume_id와 smelling_rate는 필수입니다."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        cart = request.session.get(self.SESSION_KEY, [])
+
+        # 이미 있으면 점수 업데이트
+        for item in cart:
+            if item["perfume_id"] == perfume_id:
+                item["smelling_rate"] = smelling_rate
+                request.session[self.SESSION_KEY] = cart
+                request.session.modified = True
+                return Response({"data": cart}, status=status.HTTP_200_OK)
+
+        # 새로 추가
+        cart.append({
+            "perfume_id": perfume_id,
+            "perfume_name": request.data.get("perfume_name"),  # ⭐ 추가
+            "brand": brand,
+            "perfume_img_url": perfume_img_url,
+            "smelling_rate": smelling_rate
+        })
+
+        request.session[self.SESSION_KEY] = cart
+        request.session.modified = True
+
+        return Response({"data": cart}, status=status.HTTP_200_OK)
+
+    def delete(self, request):
+        perfume_id = request.data.get("perfume_id")
+
+        cart = request.session.get(self.SESSION_KEY, [])
+        cart = [p for p in cart if p["perfume_id"] != perfume_id]
+
+        request.session[self.SESSION_KEY] = cart
+        request.session.modified = True
+
+        return Response({"data": cart}, status=status.HTTP_200_OK)
+    
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.db.models import Q
+from .models import Perfume
+
+
+
+class MyNotePerfumeSearchAPIView(APIView):
+    """
+    4-2 향수 검색 API
+    - name / brand 기준 검색
+    """
+
+    def get(self, request):
+        raw_query = request.GET.get("q", "").strip()
+        query = raw_query.replace(" ", "").replace("-", "")
+
+        if not query:
+            return Response([], status=200)
+
+        perfumes = Perfume.objects.filter(
+        Q(perfume_name__icontains=raw_query) |
+        Q(brand__icontains=raw_query) |
+        Q(brand__icontains=query)
+        )[:20]
+
+        result = []
+        for p in perfumes:
+            result.append({
+                "perfume_id": p.perfume_id,
+                "name": p.perfume_name,
+                "brand": p.brand,
+                # 이미지: 기존 api_views 방식 그대로
+                "perfume_img_url": f"/static/ui/perfume_images/{p.perfume_id}.jpg"
+            })
+
+        return Response(result, status=200)
+    
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import UserSmellingInput
+
+
+class MyNotePerfumeCompleteAPIView(APIView):
+    def _get_next_smelling_user_id(self):
+        last = UserSmellingInput.objects.order_by("-smelling_user_id").first()
+        return last.smelling_user_id + 1 if last and last.smelling_user_id else 1
+
+    def post(self, request):
+        print("🔥 my_note_style =", request.session.get("my_note_style"))
+        perfumes = request.session.get("my_note_cart", [])
+        style = request.session.get("my_note_style")
+
+        if not perfumes:
+            return Response(
+                {"error": "최소 한 개의 향수를 저장해주세요."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not style:
+            return Response(
+                {"error": "스타일 정보가 없습니다."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        smelling_user_id = self._get_next_smelling_user_id()
+
+        for p in perfumes:
+            obj = UserSmellingInput(
+                smelling_user_id=smelling_user_id,
+                season=style.get("season"),
+                perfume_id_id=p["perfume_id"],
+                brand=p.get("brand"),
+                perfume_img_url=p.get("perfume_img_url"),
+                smelling_rate=p.get("smelling_rate"),
+            )
+
+            # 원피스
+            if style["style_type"] == "onepiece":
+                dress = style.get("dress")
+                if dress:
+                    obj.dress_id_id = dress.get("id")
+                    obj.dress_color = dress.get("color")
+                    obj.dress_img = dress.get("img")
+
+            # 상의 + 하의
+            else:
+                top = style.get("top")
+                bottom = style.get("bottom")
+
+                if top:
+                    obj.top_id_id = top.get("id")
+                    obj.top_color = top.get("color")
+                    obj.top_category = top.get("category")
+                    obj.top_img = top.get("img")
+
+                if bottom:
+                    obj.bottom_id_id = bottom.get("id")
+                    obj.bottom_color = bottom.get("color")
+                    obj.bottom_category = bottom.get("category")
+                    obj.bottom_img = bottom.get("img")
+
+            # 반드시 for문 안
+            obj.save()
+
+        # 세션 정리
+        request.session.pop("my_note_cart", None)
+        request.session.pop("my_note_style", None)
+
+        return Response({"message": "MyNote 저장 완료"}, status=200)

@@ -18,3 +18,16 @@ def result(request):
 
 def result_someone(request):
     return render(request, 'ui/result_someone.html')
+
+def my_note_style(request):
+    request.session.pop("my_note_style", None)
+    request.session.pop("my_note_perfumes", None)
+
+    return render(request, "ui/my_note_style.html")
+
+def my_note_perfume(request):
+    return render(request, 'ui/my_note_perfume.html')
+
+def my_note_result(request):
+    return render(request, 'ui/my_note_result.html')
+

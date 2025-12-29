@@ -1,0 +1,237 @@
+{% extends 'ui/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="form-container">
+
+  <!-- ========================= -->
+  <!-- 헤더 -->
+  <!-- ========================= -->
+  <div class="header">
+    <h1>MyNote</h1>
+    <p>향수를 검색하고 점수를 기록해보세요</p>
+  </div>
+
+  <!-- ========================= -->
+  <!-- 4-1 선택 요약 (읽기 전용) -->
+  <!-- ========================= -->
+  <div class="section content-align">
+    <span class="box-label">선택한 스타일</span>
+
+    <div class="summary-box">
+      <p>👗 선택한 옷과 계절을 기준으로 향수를 기록합니다.</p>
+      <p style="color:#888; font-size:13px;">
+        (이 정보는 4-1에서 선택한 내용입니다)
+      </p>
+    </div>
+  </div>
+
+  <!-- ========================= -->
+  <!-- 향수 검색 -->
+  <!-- ========================= -->
+  <div class="section content-align">
+    <span class="box-label">향수 검색</span>
+
+    <div class="search-row">
+      <input
+        type="text"
+        id="perfume-search-input"
+        placeholder="향수 이름이나 브랜드를 검색하세요"
+        class="text-input"
+      >
+      <button class="selection-btn" onclick="searchPerfume()">검색</button>
+    </div>
+
+    <!-- 검색 결과 -->
+    <div id="search-result" class="card-grid">
+      <!-- JS로 동적 렌더 -->
+    </div>
+  </div>
+
+  <!-- ========================= -->
+  <!-- MyNote 장바구니 -->
+  <!-- ========================= -->
+  <div class="section content-align">
+    <span class="box-label">MyNote</span>
+
+    <div id="cart-list" class="cart-list">
+      <p style="color:#aaa;">아직 저장된 향수가 없습니다.</p>
+    </div>
+  </div>
+
+  <!-- ========================= -->
+  <!-- 완료 -->
+  <!-- ========================= -->
+  <div class="submit-container">
+    <button class="submit-btn" onclick="completeMyNote()">완료</button>
+  </div>
+
+</div>
+
+<!-- ========================= -->
+<!-- JS (UI 전용 / API 연결 전) -->
+<!-- ========================= -->
+<script>
+const csrfToken = '{{ csrf_token }}';
+
+function searchPerfume() {
+  const keyword = document.getElementById("perfume-search-input").value.trim();
+  const resultBox = document.getElementById("search-result");
+
+  if (!keyword) {
+    alert("검색어를 입력해주세요.");
+    return;
+  }
+
+  fetch(`/api/my-note/perfume/search/?q=${encodeURIComponent(keyword)}`)
+    .then(res => res.json())
+    .then(data => {
+      resultBox.innerHTML = "";
+
+      if (data.length === 0) {
+        resultBox.innerHTML = "<p style='color:#aaa;'>검색 결과가 없습니다.</p>";
+        return;
+      }
+
+      data.forEach(p => {
+        resultBox.innerHTML += `
+          <div class="card">
+            <img src="${p.perfume_img_url}" class="card-img">
+            <div class="card-info">
+              <strong>${p.name}</strong>
+              <p>${p.brand}</p>
+
+              <input
+                type="number"
+                min="0"
+                max="100"
+                placeholder="점수"
+                class="score-input"
+                id="score-${p.perfume_id}"
+              >
+
+              <button class="selection-btn"
+                onclick="addToCart(
+                ${p.perfume_id},
+                '${p.name}',
+                '${p.brand}',
+                '${p.perfume_img_url}'
+                )">
+                저장
+              </button>
+            </div>
+          </div>
+        `;
+      });
+    })
+    .catch(() => {
+      alert("향수 검색 실패");
+    });
+}
+
+
+/* 장바구니 추가 */
+function addToCart(id, name, brand, img) {
+  const scoreInput = document.getElementById(`score-${id}`);
+  const score = scoreInput.value;
+
+  if (!score) {
+    alert("점수를 입력해주세요.");
+    return;
+  }
+
+  fetch('/api/my-note/perfume/cart/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrfToken
+    },
+    body: JSON.stringify({
+      perfume_id: id,
+      perfume_name: name,
+      brand: brand,
+      perfume_img_url: img,
+      smelling_rate: score
+    })
+
+
+  })
+  .then(res => res.json())
+  .then(data => {
+    renderCart(data.data);   // 이게 핵심
+  })
+  .catch(() => {
+    alert("장바구니 저장 실패");
+  });
+}
+
+
+/* 장바구니 렌더 */
+function renderCart(cart) {
+  const cartBox = document.getElementById('cart-list');
+
+  if (!cart || cart.length === 0) {
+    cartBox.innerHTML = `<p style="color:#aaa;">아직 저장된 향수가 없습니다.</p>`;
+    return;
+  }
+
+  cartBox.innerHTML = "";
+
+  cart.forEach(p => {
+    cartBox.innerHTML += `
+      <div class="cart-item">
+        <img src="${p.perfume_img_url}" class="cart-img">
+        <div class="cart-info">
+            <strong>${p.perfume_name}</strong>
+            <p>${p.brand}</p>
+          <span>점수: ${p.smelling_rate}</span>
+        </div>
+        <button class="delete-btn" onclick="removeFromCart(${p.perfume_id})">삭제</button>
+      </div>
+    `;
+  });
+}
+
+/* 장바구니 삭제 */
+function removeFromCart(perfumeId) {
+  fetch('/api/my-note/perfume/cart/', {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrfToken
+    },
+    body: JSON.stringify({
+      perfume_id: perfumeId
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    renderCart(data.data);
+  });
+}
+
+
+/* 완료 (DB 저장 → 결과 페이지 이동) */
+function completeMyNote() {
+  fetch("/api/my-note/perfume/complete/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": csrfToken
+    }
+  })
+  .then(res => {
+    if (!res.ok) throw new Error();
+    return res.json();
+  })
+  .then(() => {
+    window.location.href = "/my-note/result/";
+  })
+  .catch(() => {
+    alert("최소 한 개의 향수를 저장해주세요.");
+  });
+}
+
+
+</script>
+{% endblock %}
