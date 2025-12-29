@@ -16,6 +16,7 @@ class Command(BaseCommand):
             "import_user_info",
             "import_classification",
             "import_user_smelling",
+            "import_user_smelling_score",
         ]
 
         for cmd in commands:

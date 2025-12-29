@@ -275,3 +275,20 @@ class Weight(models.Model):
 
     class Meta:
         db_table = 'weight'
+
+class UserSmellingMyScore(models.Model):
+    perfume_id = models.IntegerField()
+    user_id = models.IntegerField()
+
+    color_score = models.DecimalField(max_digits=10, decimal_places=6)
+    season_score = models.DecimalField(max_digits=10, decimal_places=6)
+    style_score = models.DecimalField(max_digits=10, decimal_places=6)
+    myscore = models.DecimalField(max_digits=10, decimal_places=6)
+
+    class Meta:
+        db_table = "user_smelling_myscore"
+        unique_together = ("user_id", "perfume_id")  # 동일 조합 방지
+        indexes = [
+            models.Index(fields=["user_id"]),
+            models.Index(fields=["perfume_id"]),
+        ]
