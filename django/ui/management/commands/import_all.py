@@ -15,6 +15,7 @@ class Command(BaseCommand):
             "import_dress",
             "import_user_info",
             "import_classification",
+            "import_user_smelling",
         ]
 
         for cmd in commands:
