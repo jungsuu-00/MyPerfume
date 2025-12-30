@@ -10,9 +10,8 @@
 <div class="result-container">
     <!-- 1. 헤더 섹션 (result.txt 스타일 적용) -->
     <div class="result-header" style="text-align: center; margin-top: 40px; margin-bottom: 60px;">
-        <h1 class="page-title" style="text-align: center; padding: 0;">My Perfume</h1>
-        <p class="page-subtitle" style="text-align: center; color: #888; margin-bottom: 10px;">그 사람의 향을 찾으세요</p>
-        <h2 class="section-header">For Someone, 그 사람의 분위기를 향기로 담아 선물하면 어떨까?</h2>
+        <h1 class="logo-text">MY PERFUME</h1>
+        <p class="page-subtitle" style="text-align: center; color: #888; margin-bottom: 10px;">For Someone, 그 사람의 분위기를 향기로 담아 선물하면 어떨까?</p>
     </div>
 
     <!-- 2. 상단 분석 영역 (result.txt의 가로 배치 레이아웃 적용) -->
@@ -105,7 +104,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             data.forEach((item) => {
                 const accordText = item.accords.join(' · ');
-                const formattedScore = parseFloat(item.myscore).toFixed(3);
+                item.myscore = 100*(item.myscore)
+                const formattedScore = parseFloat(item.myscore).toFixed(2);
                 const pId = item.perfume_id;
 
                 const cardHtml = `
@@ -121,22 +121,22 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="score-display-row">
                                 <span class="score-label">Matching Score</span>
                                 <span class="score-value">${formattedScore}</span>
-                                <span class="score-max">/ 3</span>
+                                <span class="score-max">/ 100</span>
                             </div>
-                            <div class="feedback-container" id="feedback-area-${pId}">
-                                <p class="feedback-msg">추천이 만족스러우신가요?</p>
-                                <div class="feedback-btns">
-                                    <button class="f-btn like" onclick="handleLike(${pId})"><span class="material-icons">thumb_up</span></button>
-                                    <button class="f-btn dislike" onclick="toggleTagBox(${pId})"><span class="material-icons">thumb_down</span></button>
-                                </div>
-                                <div class="tag-selection-box" id="tag-box-${pId}" style="display:none;">
-                                    <div class="tag-chips">
-                                        <span class="t-chip" onclick="this.classList.toggle('active')">코디와 안 어울림</span>
-                                        <span class="t-chip" onclick="this.classList.toggle('active')">계절감 불일치</span>
-                                    </div>
-                                    <button class="t-submit-btn" onclick="submitFeedback(${pId})">의견 보내기</button>
-                                </div>
-                            </div>
+<!--                            <div class="feedback-container" id="feedback-area-${pId}">-->
+<!--                                <p class="feedback-msg">추천이 만족스러우신가요?</p>-->
+<!--                                <div class="feedback-btns">-->
+<!--                                    <button class="f-btn like" onclick="handleLike(${pId})"><span class="material-icons">thumb_up</span></button>-->
+<!--                                    <button class="f-btn dislike" onclick="toggleTagBox(${pId})"><span class="material-icons">thumb_down</span></button>-->
+<!--                                </div>-->
+<!--                                <div class="tag-selection-box" id="tag-box-${pId}" style="display:none;">-->
+<!--                                    <div class="tag-chips">-->
+<!--                                        <span class="t-chip" onclick="this.classList.toggle('active')">코디와 안 어울림</span>-->
+<!--                                        <span class="t-chip" onclick="this.classList.toggle('active')">계절감 불일치</span>-->
+<!--                                    </div>-->
+<!--                                    <button class="t-submit-btn" onclick="submitFeedback(${pId})">의견 보내기</button>-->
+<!--                                </div>-->
+<!--                            </div>-->
                         </div>
                     </div>
                 `;

@@ -4,7 +4,7 @@
 
 
 <div class="home-header">
-  <h1 class="page-title">My Perfume</h1>
+  <h1 class="logo-text">MY PERFUME</h1>
   <p class="page-subtitle">당신의 향을 찾으세요</p>
 </div>
 
@@ -13,16 +13,17 @@
 <div class="home-row">
   <!-- For Me -->
   <a href="{% url 'for_me' %}" class="home-card half for-me">
-    <div class="card-title">For Me</div>
     <div class="card-desc">
-      지금의 나에게 어울리는 향은?
+      For Me
     </div>
+    <div class="card-title">지금의 나에게 어울리는 향은?</div>
+
   </a>
 
   <!-- For Someone -->
   <a href="{% url 'for_someone' %}" class="home-card half for-someone">
-    <div class="card-title">For Someone</div>
-    <div class="card-desc">
+    <div class="card-desc">For Someone</div>
+    <div class="card-title">
       그 사람의 분위기를 향기로 담아, 선물하면 어떨까?
     </div>
   </a>
@@ -32,8 +33,8 @@
   <!--<a href="{% url 'my_note_style' %}" class="home-card full">-->
   <a href="{% url 'my_note_style' %}" class="home-card full my-note">
 
-    <div class="card-title">My Note</div>
-    <div class="card-desc">
+    <div class="card-desc">My Note</div>
+    <div class="card-title">
       지금 내 스타일에 어울리는 향수를 기록해보세요
     </div>
   </a>
