@@ -1,5 +1,7 @@
 {% extends 'ui/base.html' %}
+{% load static %}
 {% block content %}
+
 
 <div class="home-header">
   <h1 class="page-title">My Perfume</h1>
@@ -8,8 +10,9 @@
 
 <div class="home-list">
 
+<div class="home-row">
   <!-- For Me -->
-  <a href="{% url 'for_me' %}" class="home-card">
+  <a href="{% url 'for_me' %}" class="home-card half for-me">
     <div class="card-title">For Me</div>
     <div class="card-desc">
       지금의 나에게 어울리는 향은?
@@ -17,20 +20,27 @@
   </a>
 
   <!-- For Someone -->
-  <a href="{% url 'for_someone' %}" class="home-card">
+  <a href="{% url 'for_someone' %}" class="home-card half for-someone">
     <div class="card-title">For Someone</div>
     <div class="card-desc">
       그 사람의 분위기를 향기로 담아, 선물하면 어떨까?
     </div>
   </a>
+</div>
 
   <!-- My Note -->
-  <a href="{% url 'my_note_style' %}" class="home-card">
+  <!--<a href="{% url 'my_note_style' %}" class="home-card full">-->
+  <a href="{% url 'my_note_style' %}" class="home-card full my-note">
+
     <div class="card-title">My Note</div>
     <div class="card-desc">
       지금 내 스타일에 어울리는 향수를 기록해보세요
     </div>
   </a>
+
+<p class="home-meta">
+  향 · 스타일 · 계절 데이터를 기반으로 추천합니다
+</p>
 
 </div>
 

@@ -239,53 +239,167 @@
         height: 65px;
     }
 }
-/* home 관련 */
+
+/* =========================
+   Home – Layout
+========================= */
+
 /* 홈 상단 */
 .home-header {
   text-align: center;
   margin: 40px 0 50px;
 }
 
-/* 세로 리스트 */
+/* 홈 전체 리스트 */
 .home-list {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 700px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
-/* 기존 카드 스타일을 재해석 */
+/* 상단 2개 카드 가로 배치 */
+.home-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+
+/* =========================
+   Home Card – Base
+========================= */
+
 .home-card {
-  background-color: #4a3b32; /* 기존 카드 색 */
-  color: white;
   border-radius: 20px;
   padding: 28px;
-  min-height: 120px;
+  color: #fff;
+  text-decoration: none;
 
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 
-  text-decoration: none;
-  transition: transform 0.2s;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .home-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
 }
 
 .home-card .card-title {
-  font-size: 20px;
+  font-size: 18px;
   opacity: 0.85;
   margin-bottom: 10px;
 }
 
 .home-card .card-desc {
   font-size: 22px;
-  font-weight: bold;
+  font-weight: 600;
   line-height: 1.4;
 }
+
+
+/* =========================
+   Card Size (Layout only)
+========================= */
+
+.home-card.half {
+  min-height: 300px;
+}
+
+.home-card.full {
+  min-height: 200px;
+}
+
+
+/* =========================
+   For Me / For Someone
+   (Meaning + Background)
+========================= */
+
+.home-card.for-me,
+.home-card.for-someone {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* For Me */
+.home-card.for-me {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
+    url("/static/ui/images/for_me_img.png");
+}
+
+/* For Someone */
+.home-card.for-someone {
+  background-image:
+    linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)),
+    url("/static/ui/images/for_someone_img.jpg");
+}
+
+
+/* =========================
+   My Note – Paper Style
+========================= */
+
+.home-card.my-note {
+  background-color: #f7f5f2;
+  color: #3a3a3a;
+
+  position: relative;
+  padding-left: 56px; /* 스프링 공간 */
+
+  border: 1px solid #e3ded8;
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.08),
+    inset 0 0 0 1px rgba(255,255,255,0.6);
+
+  /* 종이 줄 */
+  background-image:
+    linear-gradient(
+      rgba(0,0,0,0.08) 1px,
+      transparent 1px
+    );
+  background-size: 100% 26px;
+}
+
+/* 스프링 */
+.home-card.my-note::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  bottom: 18px;
+  width: 10px;
+
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      #b5b5b5,
+      #b5b5b5 6px,
+      transparent 6px,
+      transparent 12px
+    );
+}
+
+
+/* =========================
+   Footer Text
+========================= */
+
+.home-meta {
+  font-size: 13px;
+  opacity: 0.6;
+  margin-top: 8px;
+}
+
+
 
 /* ============================================================
    6. MyNote – 향수 선택 페이지 (피그마 기준)
@@ -708,3 +822,6 @@
 .mynote-result-row:last-child {
     margin-bottom: 0;
 }
+
+
+
