@@ -55,9 +55,9 @@ Top-3 향수 추천 + 설명 생성
 |---|---|
 | **2025.11.21 ~ 2025.11.29** | - 요구사항 정의<br>- 프로젝트 기획<br>- WBS 설계<br>- UI 설계(Figma) |
 | **2025.12.02 ~ 2025.12.08** | - 향수 데이터 수집<br>- 의류 이미지 전처리 |
-| **2025.12.08 ~ 2025.12.23** | - 스타일 분류 모델 개발<br>- 향수 데이터 전처리<br>- 추천 점수 산정 로직 구현<br>- 추천 알고리즘 개발<br>- LLM(RAG) 연동 |
+| **2025.12.08 ~ 2025.12.23** | - 스타일 분류 모델 개발<br>- 향수 데이터 전처리<br>- 추천 점수 산정 로직 구현<br>- 추천 알고리즘 개발<br>- LLM 연동 |
 | **2025.12.28 ~ 2025.12.30** | - 추천 성능 평가<br>- 가중치 튜닝 및 자동화 |
-| **2025.12.03 ~ 2025.12.31** | - Django UI 개발<br>- REST API 구현<br>- DB 설계(MariaDB/MySQL)<br>- Docker · Nginx · AWS 배포 |
+| **2025.12.03 ~ 2025.12.31** | - Django UI 개발<br>- REST API 구현<br>- DB 설계(MySQL)<br>- Docker · Nginx · AWS 배포 |
 
 
 ## 📂 서비스 아키텍처
@@ -85,7 +85,8 @@ Top-3 향수 추천 + 설명 생성
   <img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white">
   <img src="https://img.shields.io/badge/discord-5865F2?style=for-the-badge&logo=discord&logoColor=white">
   <img src="https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=Notion&logoColor=white" />
-  <img src="https://img.shields.io/badge/PyCharm-000000?style=for-the-badge&logo=pycharm&logoColor=brightgreen" /> <img src="https://img.shields.io/badge/Visual Studio Code-007ACC.svg?style=for-the-badge&logo=Visual Studio Code&logoColor=white" />
+  <img src="https://img.shields.io/badge/PyCharm-000000?style=for-the-badge&logo=pycharm&logoColor=brightgreen" /> <img src="https://img.shields.io/badge/Visual%20Studio%20Code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white" />
+
   
 </div>
 
@@ -96,7 +97,7 @@ Top-3 향수 추천 + 설명 생성
 | | | |
 |:---:|:---:|:---:|
 | **[양원선](https://github.com/oneline47)** | **[이정수](https://github.com/jungsuu-00)** | **[김태화](https://github.com/kimtaehwa001)** |
-| ![](https://github.com/oneline47.png?size=70) | ![](https://github.com/jungsuu-00.png?size=70) | ![](https://github.com/kimtaehwa001.png?size=70) |
+| ![](https://github.com/oneline47.png?size=120) | ![](https://github.com/jungsuu-00.png?size=120) | ![](https://github.com/kimtaehwa001.png?size=120) |
 | 팀장 · 기획<br/>데이터 분석 및 모델링 | 프론트엔드 & 백엔드 구축<br/>데이터 모델링 | 클라우드 엔지니어<br/>백엔드 구축 |
 
 ### 한 줄 소감 
