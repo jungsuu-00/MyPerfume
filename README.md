@@ -66,8 +66,47 @@ Top-3 향수 추천 + 설명 생성
 
 ## 🎨 프로토타입
 
+<details>
+  <summary>홈 화면</summary>
 
-## 🖥️ 시스템구성도
+  <!-- 여기에 이미지 또는 설명 추가 -->
+  <!-- 예: ![](docs/prototype_home.png) -->
+
+  - 서비스 소개 및 진입 화면  
+  - 향수 추천 / 선물 추천 / 시향 기록으로 이동  
+</details>
+
+<details>
+  <summary>나의 향수 추천</summary>
+
+  <!-- 예: ![](docs/prototype_my_perfume.png) -->
+
+  - 의류 이미지 기반 스타일 분석  
+  - 색감·계절을 반영한 개인화 향수 추천  
+  - 추천 이유 자연어 설명 제공  
+</details>
+
+<details>
+  <summary>향수 선물 추천</summary>
+
+  <!-- 예: ![](docs/prototype_gift.png) -->
+
+  - 선물 대상의 이미지·상황 기반 추천  
+  - 계절·분위기를 고려한 향수 제안  
+</details>
+
+<details>
+  <summary>시향 기록</summary>
+
+  <!-- 예: ![](docs/prototype_note.png) -->
+
+  - 사용자가 시향한 향수 기록  
+  - 향에 대한 개인적인 인상 저장  
+</details>
+
+
+
+## 🛠️ 시스템구성도
 ![](docs/설계_시스템구성도.png)
 
 ## 💻 기술 스택
