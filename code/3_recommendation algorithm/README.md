@@ -10,12 +10,7 @@
 
 ### - 기본 수식
 
-$$
-Score =
-W_{color} \cdot \text{ColorScore}
-+ W_{season} \cdot \text{SeasonScore}
-+ W_{style} \cdot \text{StyleScore}
-$$
+$$Score = W_{color} \cdot \text{ColorScore} + W_{season} \cdot \text{SeasonScore} + W_{style} \cdot \text{StyleScore}$$
 
 - 초기 설계에서는 세 점수를 **동일 비중 (1:1:1)** 으로 반영
 - 이후 사용자 데이터 누적에 따라 가중치 자동 조정 구조로 확장
@@ -23,24 +18,8 @@ $$
 
 ### - 상세 수식
 
-$$
-\begin{aligned}
-Score =\;&
-W_{color} \cdot \left[
-100 \times
-\left(
-1 -
-\frac{\sqrt{(R_1 - R_2)^2 + (G_1 - G_2)^2 + (B_1 - B_2)^2}}
-{255\sqrt{3}}
-\right)
-\right] \\
-&+ W_{season} \cdot
-\left[
-100 \times \frac{V_{selected}}{V_{total}}
-\right]  
-+ W_{style} \cdot A_{ij}
-\end{aligned}
-$$
+$$Score = W_{color} \cdot \left[ 100 \times \left( 1 - \frac{\sqrt{(R_1 - R_2)^2 + (G_1 - G_2)^2 + (B_1 - B_2)^2}}{255\sqrt{3}} \right) \right]+ W_{season} \cdot \left[ 100 \times \frac{V_{selected}}{V_{total}} \right]+ W_{style} \cdot A_{ij}$$
+
 
 
 ## 📊 변수 정의
