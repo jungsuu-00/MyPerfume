@@ -33,58 +33,70 @@
 
 
 ## 🎨 프로토타입
+
 <details>
   <summary>홈 화면</summary>
-  <br>
-  <div align="center">
-    <img src="docs/프로토타입/home.jpg" width="70%" style="vertical-align: top;">
-  </div>
   <p>
     • 서비스 소개 및 진입 화면<br>
     • 향수 추천 / 선물 추천 / 시향 기록으로 이동
-  </p>  
+  </p>
+
+  <div align="center">
+    <img src="docs/프로토타입/home.jpg" width="70%" style="vertical-align: top;">
+  </div>
 </details>
+
+<br>
 
 <details>
   <summary>나의 향수 추천</summary>
-  <br>
-  <div align="center">
-    <img src="docs/프로토타입/for%20me_1.jpg" width="45%" style="vertical-align: top;">
-    <img src="docs/프로토타입/for%20me_2.jpg" width="45%" style="vertical-align: top;">
-  </div>
+
   <p>
     • 의류 이미지 기반 스타일 분석<br>
     • 색감·계절을 반영한 개인화 향수 추천<br>
     • 추천 이유 자연어 설명 제공
   </p>
+
+  <div align="center">
+    <img src="docs/프로토타입/for%20me_1.jpg" width="45%" style="vertical-align: top;">
+    <img src="docs/프로토타입/for%20me_2.jpg" width="45%" style="vertical-align: top;">
+  </div>
 </details>
+
+<br>
 
 <details>
   <summary>향수 선물 추천</summary>
-  <br>
-  <div align="center">
-    <img src="docs/프로토타입/for%20someone_1.jpg" width="45%" style="vertical-align: top;">
-    <img src="docs/프로토타입/for%20someone_2.jpg" width="45%" style="vertical-align: top;">
-  </div>
+
   <p>
     • 선물 대상의 이미지·상황 기반 추천<br>
     • 계절·분위기를 고려한 향수 제안
   </p>
+
+  <div align="center">
+    <img src="docs/프로토타입/for%20someone_1.jpg" width="45%" style="vertical-align: top;">
+    <img src="docs/프로토타입/for%20someone_2.jpg" width="45%" style="vertical-align: top;">
+  </div>
 </details>
+
+<br>
 
 <details>
   <summary>시향 기록</summary>
-  <br>
+
+  <p>
+    • 사용자가 시향한 향수 기록<br>
+    • 향에 대한 개인적인 인상 저장
+  </p>
+
   <div align="center">
     <img src="docs/프로토타입/my%20note_1.png" width="30%" style="vertical-align: top;">
     <img src="docs/프로토타입/my%20note_2.png" width="30%" style="vertical-align: top;">
     <img src="docs/프로토타입/my%20note_3.png" width="30%" style="vertical-align: top;">
   </div>
-  <p>
-    • 사용자가 시향한 향수 기록<br>
-    • 향에 대한 개인적인 인상 저장
-  </p>  
 </details>
+
+
 
 ## 📊 추천 시스템 메커니즘
 ```
