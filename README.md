@@ -46,8 +46,6 @@
   </div>
 </details>
 
-<br>
-
 <details>
   <summary>나의 향수 추천</summary>
 
@@ -63,8 +61,6 @@
   </div>
 </details>
 
-<br>
-
 <details>
   <summary>향수 선물 추천</summary>
 
@@ -78,8 +74,6 @@
     <img src="docs/프로토타입/for%20someone_2.jpg" width="45%" style="vertical-align: top;">
   </div>
 </details>
-
-<br>
 
 <details>
   <summary>시향 기록</summary>
