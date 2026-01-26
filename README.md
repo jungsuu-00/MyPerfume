@@ -101,7 +101,7 @@ Top-3 향수 추천 + 설명 생성
 
 **[알고리즘 상세 설명 링크](https://github.com/jungsuu-00/MyPerfume/tree/main/code/3_recommendation%20algorithm)**
 
-## 💬 설명 생성 (Explainability)
+## 💬 설명 생성
 추천 결과에는 단순한 향수 리스트가 아닌,  
 **스타일·색감·계절 맥락을 연결한 자연어 설명**을 함께 제공합니다.
 
