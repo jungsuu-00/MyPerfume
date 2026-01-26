@@ -99,7 +99,9 @@ Top-3 향수 추천 + 설명 생성
 - 모든 점수는 정규화 후 가중치 튜닝
 - Precision@k 기준 성능 개선 검증
 
-**[알고리즘 상세 설명 링크](https://github.com/jungsuu-00/MyPerfume/blob/main/code/3_recommendation%20algorithm/README_algorithm.md)**
+**[스타일 분류 모델링_상세 설명 링크](https://github.com/jungsuu-00/MyPerfume/blob/main/code/2_style%20classification%20modeling/README_modeling.md)**  
+
+**[추천 알고리즘_상세 설명 링크](https://github.com/jungsuu-00/MyPerfume/blob/main/code/3_recommendation%20algorithm/README_algorithm.md)**
 
 ## 💬 설명 생성
 추천 결과에는 단순한 향수 리스트가 아닌,  
