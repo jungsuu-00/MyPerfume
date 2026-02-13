@@ -1,4 +1,4 @@
-# 🔎 MyPerfume  
+# 🔎 MyPerfume - 향수 추천 서비스  
 **LG U+ Why Not SW Camp 8기** | 양원선 · 이정수 · 김태화  
 **[최종보고서 링크](https://lgu8myperfume.my.canva.site/)**
 ## 📌 프로젝트 개요 
