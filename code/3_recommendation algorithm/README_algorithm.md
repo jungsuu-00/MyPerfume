@@ -79,7 +79,6 @@ Style Score는 **모델 기반 스타일 분류 결과**와
 - 각 추천 결과는 색상·계절·스타일 기준 설명과 함께 제공
 
 
-
 ## ⚙️ 점수 안정화 및 성능 고도화
 
 ### - 문제점
@@ -90,5 +89,19 @@ Style Score는 **모델 기반 스타일 분류 결과**와
 - Re-Ranking 적용
 - Min-Max Scaling + ε Smoothing
 - 사용자 데이터 누적 기반 Precision@k 기준 가중치 자동 조정
+> 안정성·다양성·정확도 동시 개선
 
-이를 통해 추천 결과의 **안정성·다양성·정확도**를 함께 확보했다.
+### - Precision@k 성능 개선(k=3)
+
+- 평가 기준 : **Top-k 추천 결과 중 정답 비율을 의미하는 Precision@k**
+
+  | 구분 | Precision@k | 상대 향상 |
+  |---|---:|---:|
+  | Baseline | 0.010000 | - |
+  | 개선 후 | 0.016667 | +66.7% |
+
+> 개선 후 Top-3 정확도가 Baseline 대비 66.7% 향상됨.
+
+![](docs/precision_at_k_improvement.png)
+
+
