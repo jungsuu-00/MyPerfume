@@ -102,6 +102,6 @@ Style Score는 **모델 기반 스타일 분류 결과**와
 
 > 개선 후 Top-3 정확도가 Baseline 대비 66.7% 향상됨.
 
-![](docs/precision_at_k_improvement.png)
+![](../../docs/precision_at_k_improvement.png)
 
 
