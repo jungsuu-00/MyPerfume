@@ -91,17 +91,27 @@ Style Score는 **모델 기반 스타일 분류 결과**와
 - 사용자 데이터 누적 기반 Precision@k 기준 가중치 자동 조정
 > 안정성·다양성·정확도 동시 개선
 
-### - Precision@k 성능 개선(k=3)
+### - 성능 개선 결과
 
-- 평가 기준 : **Top-k 추천 결과 중 정답 비율을 의미하는 Precision@k**
+- 평가 기준 : **Top-k 추천 결과 중 정답 비율을 의미하는 Precision@k(k=3))**
 
-  | 구분 | Precision@k | 상대 향상 |
-  |---|---:|---:|
-  | Baseline | 0.010000 | - |
-  | 개선 후 | 0.016667 | +66.7% |
+<table>
+<tr>
+<td>
+
+| 구분 | Precision@k | 상대 향상 |
+|---|---:|---:|
+| Baseline | 0.010000 | - |
+| 개선 후 | 0.016667 | **+66.7%** |
 
 > 개선 후 Top-3 정확도가 Baseline 대비 66.7% 향상됨.
 
-![](../../docs/precision_at_k_improvement.png)
+</td>
+<td align="center">
 
+<img src="../../docs/precision_at_k_improvement.png" width="260">
+
+</td>
+</tr>
+</table>
 
